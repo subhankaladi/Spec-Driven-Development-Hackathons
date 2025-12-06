@@ -1,55 +1,83 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: 0.0.0 → 1.0.0
+- List of modified principles:
+  - PRINCIPLE_1_NAME → Strict Spec-Driven Development
+  - PRINCIPLE_2_NAME → Accuracy and Completeness
+  - PRINCIPLE_3_NAME → Consistency Across Phases
+  - PRINCIPLE_4_NAME → AI-First Tooling
+  - PRINCIPLE_5_NAME → Sequential Phased-Based Development
+- Added sections:
+  - Principle 6: Stateless Tooling with Persistent State
+  - Principle 7: Cloud Native Practices
+  - Principle 8: Progressive Feature Rollout
+  - Principle 9: Reproducibility
+  - Key Standards
+  - Constraints
+  - Success Criteria
+- Removed sections: None
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md
+  - ✅ .specify/templates/spec-template.md
+  - ✅ .specify/templates/tasks-template.md
+- Follow-up TODOs: None
+-->
+# 5-Phase Evolution of Todo Application (Console → Web → AI Chatbot → Kubernetes → Cloud) Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Strict Spec-Driven Development
+No manual coding. Every feature requires a clear Spec + refined implementation loop.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Accuracy and Completeness
+All feature implementations must be accurate and complete as defined in their respective specifications.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Consistency Across Phases
+Consistency in specifications, architecture, APIs, and database schemas must be maintained across all development phases.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. AI-First Tooling
+The project will exclusively use Claude Code for code generation and Spec-Kit Plus, OpenAI Chatbot/Agents, and MCP for development and automation.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Sequential Phased-Based Development
+The 5 project phases must be completed sequentially.
 
-### [PRINCIPLE_6_NAME]
+### VI. Stateless Tooling with Persistent State
+MCP tools must be stateless. All application state is to be managed in a PostgreSQL database.
 
+### VII. Cloud Native Practices
+Cloud deployments must adhere to Kubernetes best practices, using Helm charts for packaging. Event-driven pipelines will be implemented using Dapr and Kafka.
 
-[PRINCIPLE__DESCRIPTION]
+### VIII. Progressive Feature Rollout
+Intermediate and Advanced features are only allowed to be implemented in Phase V.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### IX. Reproducibility
+All phases of the project must be fully reproducible from their specifications with zero manual code writing.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Key Standards
+- Every feature requires a clear Spec + refined implementation loop.
+- Code must be generated exclusively through Claude Code.
+- APIs must follow REST conventions.
+- MCP tools must be stateless; all state in PostgreSQL.
+- Cloud deployments must use Kubernetes best practices and Helm charts.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Constraints
+- 5 Phases must be completed sequentially:
+  1. Python console app (in-memory)
+  2. Full-stack web app with Neon PostgreSQL + Better Auth
+  3. AI Chatbot using MCP Server + OpenAI Agents SDK
+  4. Local Kubernetes deployment (Minikube, Docker, Helm)
+  5. Cloud deployment (DOKS/GKE/AKS) + Dapr + Kafka
+- Intermediate & Advanced features are only allowed in Phase V.
+- All specs must be written in Markdown.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Success Criteria
+- The Console, Web, AI Chatbot, and Kubernetes versions are all fully functional.
+- Natural-language task management works via MCP + Agents.
+- Local & Cloud Kubernetes deployments succeed without errors.
+- Dapr + Kafka integrations operate event-driven pipelines.
+- All phases are reproducible from spec with zero manual code writing.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This constitution is the single source of truth for project principles and standards. All development activities must comply with it. Amendments require documentation, review, and an approved migration plan.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-06

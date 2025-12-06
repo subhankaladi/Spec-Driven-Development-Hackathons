@@ -31,7 +31,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **Strict Spec-Driven Development**: Does this plan rely exclusively on specs for implementation?
+- [ ] **Accuracy and Completeness**: Does the plan account for all requirements in the spec?
+- [ ] **Consistency Across Phases**: Does the plan maintain consistency with previous phases?
+- [ ] **AI-First Tooling**: Does the plan utilize the approved AI-first toolchain?
+- [ ] **Sequential Phased-Based Development**: Does this feature belong to the current phase of development?
+- [ ] **Stateless Tooling with Persistent State**: Does the architecture respect the stateless nature of tools and persist state in PostgreSQL?
+- [ ] **Cloud Native Practices**: If applicable, does the plan follow cloud-native best practices?
+- [ ] **Progressive Feature Rollout**: Does the feature adhere to the progressive rollout plan?
+- [ ] **Reproducibility**: Is the proposed implementation reproducible from the spec?
 
 ## Project Structure
 

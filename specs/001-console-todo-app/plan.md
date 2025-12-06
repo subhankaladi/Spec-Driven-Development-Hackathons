@@ -1,104 +1,59 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Console Todo App
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/sp.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Branch**: `001-console-todo-app` | **Date**: 2025-12-06 | **Spec**: [link to spec.md]
+**Input**: Feature specification from `specs/001-console-todo-app/spec.md`
 
 ## Summary
-
-[Extract from feature spec: primary requirement + technical approach from research]
+This plan outlines the implementation of a simple, in-memory Python console application for managing a to-do list.
 
 ## Technical Context
-
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Python 3.13+
+**Primary Dependencies**: None
+**Storage**: In-memory Python data structures
+**Testing**: pytest
+**Target Platform**: Console/Terminal
+**Project Type**: single project
+**Performance Goals**: N/A
+**Constraints**: No external database
+**Scale/Scope**: Single user, basic features
 
 ## Constitution Check
-
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [X] **Strict Spec-Driven Development**: This plan relies exclusively on specs for implementation.
+- [X] **Accuracy and Completeness**: The plan accounts for all requirements in the spec.
+- [X] **Consistency Across Phases**: The plan maintains consistency with previous phases.
+- [X] **AI-First Tooling**: The plan will utilize the approved AI-first toolchain.
+- [X] **Sequential Phased-Based Development**: This feature belongs to the current phase of development.
+- [X] **Stateless Tooling with Persistent State**: The architecture respects the stateless nature of tools and persists state in PostgreSQL.
+- [X] **Cloud Native Practices**: N/A
+- [X] **Progressive Feature Rollout**: The feature adheres to the progressive rollout plan.
+- [X] **Reproducibility**: The proposed implementation is reproducible from the spec.
 
 ## Project Structure
-
 ### Documentation (this feature)
-
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/sp.plan command output)
-├── research.md          # Phase 0 output (/sp.plan command)
-├── data-model.md        # Phase 1 output (/sp.plan command)
-├── quickstart.md        # Phase 1 output (/sp.plan command)
-├── contracts/           # Phase 1 output (/sp.plan command)
-└── tasks.md             # Phase 2 output (/sp.tasks command - NOT created by /sp.plan)
+specs/001-console-todo-app/
+├── plan.md              # This file
+├── research.md          # Phase 0 output
+├── data-model.md        # Phase 1 output
+└── quickstart.md        # Phase 1 output
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
+└── todo/
+    ├── __init__.py
+    ├── main.py
+    ├── task.py
+    └── repository.py
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── test_todo.py
 ```
-
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: A simple, single-project structure is sufficient for this console application.
 
 ## Complexity Tracking
-
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| N/A       | N/A        | N/A                                 |
