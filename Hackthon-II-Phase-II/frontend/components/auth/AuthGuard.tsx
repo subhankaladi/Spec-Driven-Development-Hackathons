@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { useRequireAuth } from "@/hooks/useAuth";
+import { useRequireAuth } from "../../hooks/useAuth"
 import { LoadingScreen } from "@/components/ui/Spinner";
 
 interface AuthGuardProps {

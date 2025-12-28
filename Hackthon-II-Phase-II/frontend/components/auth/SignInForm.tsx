@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth"
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { isValidEmail } from "@/lib/utils";
+import { isValidEmail } from "../../lib/utils"
 
 interface SignInFormData {
   email: string;

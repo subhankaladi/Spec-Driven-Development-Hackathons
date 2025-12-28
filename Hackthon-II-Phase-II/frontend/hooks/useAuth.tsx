@@ -14,8 +14,8 @@ import {
   signUp as authSignUp,
   signOut as authSignOut,
   checkAuthState,
-} from "@/lib/auth";
-import type { AuthState } from "@/types";
+} from "../lib/auth";
+import type { AuthState } from "../types"
 
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
