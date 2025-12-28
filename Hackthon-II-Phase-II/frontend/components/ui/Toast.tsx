@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, ReactNode } from "react";
-import { cn } from "../../lib/utils"
-import type { Toast as ToastType, ToastType as ToastVariant } from "../../types"
+import { cn } from "@/lib/utils";
+import type { Toast as ToastType, ToastType as ToastVariant } from "@/types"
 
 interface ToastProps extends ToastType {
   onDismiss: (id: string) => void;
