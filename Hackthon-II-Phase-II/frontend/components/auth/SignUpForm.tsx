@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { isValidEmail, isValidPassword } from "@/lib/utils";

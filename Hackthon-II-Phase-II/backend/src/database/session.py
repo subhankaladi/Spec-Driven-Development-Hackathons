@@ -4,12 +4,24 @@ from typing import Generator
 
 
 # Create the database engine with connection pooling
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False},  # Needed for SQLite
-    pool_pre_ping=True,  # Verify connections before use
-    pool_recycle=300,  # Recycle connections after 5 minutes
-)
+# Different configuration for SQLite vs PostgreSQL
+if settings.is_sqlite:
+    # SQLite configuration
+    engine = create_engine(
+        settings.database_url,
+        connect_args={"check_same_thread": False},  # Needed for SQLite
+        echo=not settings.is_production,  # Log SQL queries in development
+    )
+else:
+    # PostgreSQL (Neon) configuration
+    engine = create_engine(
+        settings.database_url,
+        pool_size=5,  # Number of connections to maintain
+        max_overflow=10,  # Max connections beyond pool_size
+        pool_pre_ping=True,  # Verify connections before use
+        pool_recycle=300,  # Recycle connections after 5 minutes
+        echo=not settings.is_production,  # Log SQL queries in development
+    )
 
 
 def get_session() -> Generator[Session, None, None]:

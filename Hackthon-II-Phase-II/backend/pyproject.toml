@@ -10,4 +10,7 @@ dependencies = [
     "python-jose>=3.5.0",
     "sqlmodel>=0.0.30",
     "uvicorn>=0.40.0",
+    "psycopg2-binary>=2.9.9",
+    "alembic>=1.13.0",
+    "psycopg2>=2.9.11",
 ]
