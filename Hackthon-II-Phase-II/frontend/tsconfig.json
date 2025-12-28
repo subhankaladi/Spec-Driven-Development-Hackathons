@@ -13,8 +13,6 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-
-    "baseUrl": ".",                // Base directory for non-relative module names
     "paths": {
       "@/*": ["./*"]               
     },
