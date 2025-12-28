@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { AuthProvider } from "../hooks/useAuth"
-import { ToastProvider, useToast } from "@/hooks/useToast";
+import { ToastProvider, useToast } from "../hooks/useToast"
 import { ToastContainer } from "@/components/ui/Toast";
 
 function ToastWrapper({ children }: { children: ReactNode }) {

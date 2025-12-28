@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Task } from "@/types";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn, formatRelativeTime } from "../../lib/utils";
 
 interface TaskCardProps {
   task: Task;
