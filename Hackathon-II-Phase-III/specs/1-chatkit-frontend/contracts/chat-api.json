@@ -1,0 +1,91 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Chat API for Todo Management",
+    "version": "1.0.0",
+    "description": "API contract for the chat interface that connects to the backend for todo management"
+  },
+  "paths": {
+    "/api/v1/{user_id}/chat": {
+      "post": {
+        "summary": "Send a chat message to the backend",
+        "description": "Sends a user message to the backend API for processing by the AI agent",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the authenticated user",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "The user's chat message",
+                    "example": "Add a task to buy groceries"
+                  }
+                },
+                "required": ["message"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully processed chat message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "description": "ID of the conversation"
+                    },
+                    "assistant_message": {
+                      "type": "string",
+                      "description": "Response from the assistant"
+                    }
+                  },
+                  "required": ["conversation_id", "assistant_message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT"
+          },
+          "403": {
+            "description": "Forbidden - User ID in token doesn't match path parameter"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

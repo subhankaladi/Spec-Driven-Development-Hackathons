@@ -1,0 +1,38 @@
+{
+  "route": "POST /api/v1/{user_id}/chat",
+  "auth": {
+    "type": "bearer_jwt"
+  },
+  "pathParams": {
+    "user_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Authenticated user id (must match JWT)"
+    }
+  },
+  "request": {
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": "string",
+        "minLength": 1,
+        "description": "User message in natural language"
+      }
+    },
+    "required": ["message"]
+  },
+  "response": {
+    "type": "object",
+    "properties": {
+      "conversation_id": { "type": "string", "format": "uuid" },
+      "assistant_message": { "type": "string" }
+    },
+    "required": ["conversation_id", "assistant_message"]
+  },
+  "errors": [
+    { "status": 401, "error_code": "AUTH_001" },
+    { "status": 403, "error_code": "AUTH_002" },
+    { "status": 422, "error_code": "VALIDATION_ERROR" },
+    { "status": 500, "error_code": "SERVER_ERROR" }
+  ]
+}
