@@ -1,0 +1,23 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.128.0",
+    "pydantic-settings>=2.12.0",
+    "python-jose>=3.5.0",
+    "sqlmodel>=0.0.30",
+    "uvicorn>=0.40.0",
+    "psycopg2-binary>=2.9.9",
+    "alembic>=1.13.0",
+    "psycopg2>=2.9.11",
+
+    # Spec-6 (AI Agent & Stateless Chat API)
+    "openai-agents>=0.2.9",
+
+    # Required for Spec-5 MCP server runtime imports (backend/src/mcp_server/server.py)
+    "mcp>=1.0.0",
+]
+

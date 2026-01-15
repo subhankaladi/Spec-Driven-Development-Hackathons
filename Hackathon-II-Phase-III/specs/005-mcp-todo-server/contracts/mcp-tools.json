@@ -1,0 +1,209 @@
+{
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "add_task",
+      "description": "Create a new task for the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Task title (required)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional task description"
+          }
+        },
+        "required": ["title"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "task": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "is_completed": { "type": "boolean" },
+                  "created_at": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "list_tasks",
+      "description": "List all tasks for the authenticated user, optionally filtered by completion status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "filter_completed": {
+            "type": "boolean",
+            "description": "If true, return only completed tasks; if false, only incomplete; if omitted, return all"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "title": { "type": "string" },
+                    "description": { "type": "string" },
+                    "is_completed": { "type": "boolean" },
+                    "created_at": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "update_task",
+      "description": "Update the title or description of a task owned by the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Task UUID to update"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "New task title (optional)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "New task description (optional)"
+          }
+        },
+        "required": ["task_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "task": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "is_completed": { "type": "boolean" },
+                  "updated_at": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "complete_task",
+      "description": "Mark a task as completed",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Task UUID to complete"
+          }
+        },
+        "required": ["task_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "task": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "title": { "type": "string" },
+                  "is_completed": { "type": "boolean" },
+                  "updated_at": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_task",
+      "description": "Delete a task owned by the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Task UUID to delete"
+          }
+        },
+        "required": ["task_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "deleted": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "errors": {
+    "AUTH_ERROR": {
+      "code": "AUTH_ERROR",
+      "message": "Authentication failed or user ID not found in token"
+    },
+    "NOT_FOUND": {
+      "code": "NOT_FOUND",
+      "message": "Task not found or you do not have permission to access it"
+    },
+    "VALIDATION_ERROR": {
+      "code": "VALIDATION_ERROR",
+      "message": "Invalid input provided"
+    },
+    "INTERNAL_ERROR": {
+      "code": "INTERNAL_ERROR",
+      "message": "An internal error occurred"
+    }
+  }
+}
