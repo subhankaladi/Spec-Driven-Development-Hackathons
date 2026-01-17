@@ -1,0 +1,72 @@
+{
+  "name": "update_task",
+  "description": "Modify task title, description, or completion status for the authenticated user",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "jwt_token": {
+        "type": "string",
+        "description": "JWT authentication token with user identity"
+      },
+      "task_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Task ID to update"
+      },
+      "title": {
+        "type": "string",
+        "description": "New title (1-255 chars, optional)",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "description": {
+        "type": "string",
+        "description": "New description (optional)"
+      },
+      "is_completed": {
+        "type": "boolean",
+        "description": "New completion status (optional)"
+      }
+    },
+    "required": ["jwt_token", "task_id"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "string", "format": "uuid"},
+      "user_id": {"type": "string", "format": "uuid"},
+      "title": {"type": "string"},
+      "description": {"type": ["string", "null"]},
+      "is_completed": {"type": "boolean"},
+      "created_at": {"type": "string", "format": "date-time"},
+      "updated_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Timestamp refreshed on update"
+      }
+    },
+    "required": ["id", "user_id", "title", "description", "is_completed", "created_at", "updated_at"]
+  },
+  "errors": [
+    {
+      "code": "AUTHENTICATION_ERROR",
+      "message": "Missing, invalid, or expired JWT token"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "message": "Invalid task_id format or title validation failed"
+    },
+    {
+      "code": "NOT_FOUND_ERROR",
+      "message": "Task not found"
+    },
+    {
+      "code": "AUTHORIZATION_ERROR",
+      "message": "Task belongs to different user"
+    },
+    {
+      "code": "DATABASE_ERROR",
+      "message": "Database operation failed"
+    }
+  ]
+}

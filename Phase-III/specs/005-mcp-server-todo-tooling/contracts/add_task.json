@@ -1,0 +1,76 @@
+{
+  "name": "add_task",
+  "description": "Create a new task for the authenticated user",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "jwt_token": {
+        "type": "string",
+        "description": "JWT authentication token with user identity"
+      },
+      "title": {
+        "type": "string",
+        "description": "Task title (1-255 characters)",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "description": {
+        "type": "string",
+        "description": "Optional task description"
+      }
+    },
+    "required": ["jwt_token", "title"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique task identifier"
+      },
+      "user_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Owner user identifier"
+      },
+      "title": {
+        "type": "string",
+        "description": "Task title"
+      },
+      "description": {
+        "type": ["string", "null"],
+        "description": "Task description (null if not provided)"
+      },
+      "is_completed": {
+        "type": "boolean",
+        "description": "Completion status (always false for new tasks)"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Task creation timestamp (ISO 8601)"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Last update timestamp (ISO 8601)"
+      }
+    },
+    "required": ["id", "user_id", "title", "description", "is_completed", "created_at", "updated_at"]
+  },
+  "errors": [
+    {
+      "code": "AUTHENTICATION_ERROR",
+      "message": "Missing, invalid, or expired JWT token"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "message": "Title is required and must be 1-255 characters"
+    },
+    {
+      "code": "DATABASE_ERROR",
+      "message": "Database operation failed"
+    }
+  ]
+}
