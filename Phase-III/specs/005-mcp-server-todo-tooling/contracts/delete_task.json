@@ -1,0 +1,58 @@
+{
+  "name": "delete_task",
+  "description": "Permanently remove a task from the database for the authenticated user",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "jwt_token": {
+        "type": "string",
+        "description": "JWT authentication token with user identity"
+      },
+      "task_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Task ID to delete"
+      }
+    },
+    "required": ["jwt_token", "task_id"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "deleted": {
+        "type": "boolean",
+        "description": "Always true on successful deletion",
+        "const": true
+      },
+      "task_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "ID of the deleted task"
+      }
+    },
+    "required": ["deleted", "task_id"]
+  },
+  "notes": "Hard delete - task is permanently removed. Calling delete_task on non-existent task returns NOT_FOUND error (not idempotent)",
+  "errors": [
+    {
+      "code": "AUTHENTICATION_ERROR",
+      "message": "Missing, invalid, or expired JWT token"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "message": "Invalid task_id format"
+    },
+    {
+      "code": "NOT_FOUND_ERROR",
+      "message": "Task not found or already deleted"
+    },
+    {
+      "code": "AUTHORIZATION_ERROR",
+      "message": "Task belongs to different user"
+    },
+    {
+      "code": "DATABASE_ERROR",
+      "message": "Database operation failed"
+    }
+  ]
+}

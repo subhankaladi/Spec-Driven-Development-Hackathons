@@ -1,0 +1,84 @@
+{
+  "name": "list_tasks",
+  "description": "Retrieve tasks for the authenticated user with optional filtering and pagination",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "jwt_token": {
+        "type": "string",
+        "description": "JWT authentication token with user identity"
+      },
+      "completed": {
+        "type": "boolean",
+        "description": "Filter by completion status (optional)"
+      },
+      "page": {
+        "type": "integer",
+        "description": "Page number (1-indexed)",
+        "minimum": 1,
+        "default": 1
+      },
+      "page_size": {
+        "type": "integer",
+        "description": "Items per page",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20
+      }
+    },
+    "required": ["jwt_token"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "description": "Array of task objects matching filter",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string", "format": "uuid"},
+            "user_id": {"type": "string", "format": "uuid"},
+            "title": {"type": "string"},
+            "description": {"type": ["string", "null"]},
+            "is_completed": {"type": "boolean"},
+            "created_at": {"type": "string", "format": "date-time"},
+            "updated_at": {"type": "string", "format": "date-time"}
+          },
+          "required": ["id", "user_id", "title", "description", "is_completed", "created_at", "updated_at"]
+        }
+      },
+      "total": {
+        "type": "integer",
+        "description": "Total number of tasks matching filter"
+      },
+      "page": {
+        "type": "integer",
+        "description": "Current page number"
+      },
+      "page_size": {
+        "type": "integer",
+        "description": "Items per page"
+      },
+      "total_pages": {
+        "type": "integer",
+        "description": "Total number of pages"
+      }
+    },
+    "required": ["items", "total", "page", "page_size", "total_pages"]
+  },
+  "errors": [
+    {
+      "code": "AUTHENTICATION_ERROR",
+      "message": "Missing, invalid, or expired JWT token"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "message": "Invalid pagination parameters (page must be >= 1, page_size 1-100)"
+    },
+    {
+      "code": "DATABASE_ERROR",
+      "message": "Database operation failed"
+    }
+  ]
+}
