@@ -1,0 +1,528 @@
+# Frontend UI Component Contract
+
+**Purpose**: Define component structure and interfaces for frontend implementation
+
+## Component Hierarchy
+
+```
+App (root layout)
+├── AuthContext (provider)
+│   ├── LandingPage (/)
+│   ├── AuthLayout (/sign-in, /sign-up)
+│   │   ├── SignInForm
+│   │   └── SignUpForm
+│   └── DashboardLayout (/tasks/*)
+│       ├── Navigation
+│       ├── TasksPage (/tasks)
+│       │   ├── TaskList
+│       │   │   ├── TaskCard (x N)
+│       │   │   └── Pagination
+│       │   └── TaskEmptyState
+│       ├── TaskCreatePage (/tasks/create)
+│       │   └── TaskForm
+│       └── TaskDetailPage (/tasks/[id])
+│           └── TaskForm
+│
+└── Shared UI Components
+    ├── Button
+    ├── Input
+    ├── TextArea
+    ├── Checkbox
+    └── Modal
+```
+
+## Component Specifications
+
+### Auth Components
+
+#### SignInForm
+
+**Location**: `src/components/auth/SignInForm.tsx`
+
+**Props**:
+```typescript
+interface SignInFormProps {
+  onSuccess?: () => void;
+  initialEmail?: string;
+}
+```
+
+**State**: Form state (email, password, errors, isSubmitting)
+
+**Actions**:
+- `signIn(email, password)` - Call auth API
+- Validate input on blur
+- Display error messages
+
+**Outputs**:
+- On success: Call `onSuccess()` callback or redirect to `/tasks`
+- On error: Display error message
+
+---
+
+#### SignUpForm
+
+**Location**: `src/components/auth/SignUpForm.tsx`
+
+**Props**:
+```typescript
+interface SignUpFormProps {
+  onSuccess?: () => void;
+}
+```
+
+**State**: Form state (email, password, confirmPassword, errors, isSubmitting)
+
+**Actions**:
+- `signUp(email, password)` - Call auth API
+- Validate input on blur
+- Match password confirmation
+- Display error messages
+
+**Outputs**:
+- On success: Call `onSuccess()` callback or redirect to `/tasks`
+- On error: Display error message
+
+---
+
+### Task Components
+
+#### TaskList
+
+**Location**: `src/components/tasks/TaskList.tsx`
+
+**Props**:
+```typescript
+interface TaskListProps {
+  tasks: Task[];
+  loading: boolean;
+  error: string | null;
+  pagination: PaginationState;
+  onPageChange: (page: number) => void;
+  onToggleComplete: (taskId: string) => void;
+  onDelete: (taskId: string) => void;
+}
+```
+
+**State**: None (controlled component)
+
+**Actions**:
+- Display loading state when `loading=true`
+- Display error state when `error!=null`
+- Display empty state when `tasks.length=0`
+- Render TaskCard for each task
+
+**Outputs**:
+- `onPageChange(page)` - User clicks pagination
+- `onToggleComplete(taskId)` - User toggles checkbox
+- `onDelete(taskId)` - User clicks delete
+
+---
+
+#### TaskCard
+
+**Location**: `src/components/tasks/TaskCard.tsx`
+
+**Props**:
+```typescript
+interface TaskCardProps {
+  task: Task;
+  onToggleComplete: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+```
+
+**State**: None (controlled component)
+
+**Actions**:
+- Display task title, description, completion status
+- Show "Completed" badge when `is_completed=true`
+- Handle checkbox click (optimistic update)
+- Handle edit/delete button clicks
+
+**Outputs**:
+- `onToggleComplete()` - User toggles checkbox
+- `onEdit()` - User clicks edit
+- `onDelete()` - User clicks delete
+
+---
+
+#### TaskForm
+
+**Location**: `src/components/tasks/TaskForm.tsx`
+
+**Props**:
+```typescript
+interface TaskFormProps {
+  initialData?: Partial<Task>;
+  mode: 'create' | 'edit';
+  onSubmit: (data: TaskCreateRequest) => void;
+  onCancel: () => void;
+  isSubmitting: boolean;
+}
+```
+
+**State**: Form state (title, description, errors, touched)
+
+**Actions**:
+- Validate title (required, 1-255 chars)
+- Validate description (optional, plain text)
+- Disable submit button when `isSubmitting=true`
+- Display validation errors
+
+**Outputs**:
+- `onSubmit(data)` - User submits form
+- `onCancel()` - User cancels
+
+---
+
+#### TaskEmptyState
+
+**Location**: `src/components/tasks/TaskEmptyState.tsx`
+
+**Props**:
+```typescript
+interface TaskEmptyStateProps {
+  onCreateTask: () => void;
+}
+```
+
+**State**: None
+
+**Actions**:
+- Display friendly message
+- Show "Create Task" CTA button
+
+**Outputs**:
+- `onCreateTask()` - User clicks CTA
+
+---
+
+### Shared UI Components
+
+#### Button
+
+**Location**: `src/components/ui/Button.tsx`
+
+**Props**:
+```typescript
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
+  children: React.ReactNode;
+}
+```
+
+**Variants**:
+- `primary`: Blue background, white text
+- `secondary`: Gray background, white text
+- `danger`: Red background, white text
+- `ghost`: Transparent background, colored text
+
+**Sizes**:
+- `sm`: Small padding, smaller text
+- `md`: Medium padding (default)
+- `lg`: Large padding, larger text
+
+---
+
+#### Input
+
+**Location**: `src/components/ui/Input.tsx`
+
+**Props**:
+```typescript
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  touched?: boolean;
+}
+```
+
+**Features**:
+- Label above input
+- Error message below input (red when `error` and `touched`)
+- Focus styling
+- Disabled state
+
+---
+
+#### TextArea
+
+**Location**: `src/components/ui/TextArea.tsx`
+
+**Props**:
+```typescript
+interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string;
+  touched?: boolean;
+}
+```
+
+**Features**:
+- Label above textarea
+- Error message below textarea
+- Resize handle (vertical only)
+- Minimum height: 100px
+
+---
+
+#### Checkbox
+
+**Location**: `src/components/ui/Checkbox.tsx`
+
+**Props**:
+```typescript
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  label?: string;
+}
+```
+
+**Features**:
+- Large click area (44px minimum)
+- Visual checked/unchecked states
+- Disabled state
+
+---
+
+#### Modal
+
+**Location**: `src/components/ui/Modal.tsx`
+
+**Props**:
+```typescript
+interface ModalProps {
+  isOpen: boolean;
+  title?: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  actions?: React.ReactNode;
+}
+```
+
+**Features**:
+- Backdrop overlay
+- Close button (X) in header
+- Close on ESC key
+- Close on backdrop click
+- Focus trap when open
+
+---
+
+## Page Component Contracts
+
+### LandingPage
+
+**Location**: `src/app/page.tsx`
+
+**Route**: `/`
+
+**State**: None
+
+**Actions**:
+- Display landing page content
+- Links to `/sign-in` and `/sign-up`
+
+---
+
+### TasksPage
+
+**Location**: `src/app/(dashboard)/tasks/page.tsx`
+
+**Route**: `/tasks`
+
+**State**:
+- Fetch tasks on mount (`useTasks` hook)
+- Pagination state (page, pageSize)
+
+**Actions**:
+- Display task list
+- Handle pagination
+- Navigate to `/tasks/create`
+- Navigate to `/tasks/[id]`
+
+---
+
+### TaskCreatePage
+
+**Location**: `src/app/(dashboard)/tasks/create/page.tsx`
+
+**Route**: `/tasks/create`
+
+**State**:
+- Form state (title, description, errors)
+- Submit state (isSubmitting)
+
+**Actions**:
+- Display create task form
+- Submit to backend
+- Redirect to `/tasks` on success
+
+---
+
+### TaskDetailPage
+
+**Location**: `src/app/(dashboard)/tasks/[taskId]/page.tsx`
+
+**Route**: `/tasks/[taskId]`
+
+**State**:
+- Fetch task on mount
+- Form state for editing
+
+**Actions**:
+- Display task details
+- Edit mode toggle
+- Update task on submit
+- Delete task with confirmation
+- Redirect to `/tasks` on delete
+
+---
+
+## React Hook Contracts
+
+### useAuth
+
+**Location**: `src/lib/hooks/useAuth.ts`
+
+**Returns**:
+```typescript
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => void;
+}
+```
+
+**Behavior**:
+- Check localStorage for token on mount
+- Decode JWT to get user info
+- Provide auth methods
+- Handle 401 errors from API calls
+
+---
+
+### useTasks
+
+**Location**: `src/lib/hooks/useTasks.ts`
+
+**Returns**:
+```typescript
+interface UseTasksReturn {
+  tasks: Task[];
+  loading: boolean;
+  error: string | null;
+  pagination: PaginationState;
+  createTask: (data: TaskCreateRequest) => Promise<void>;
+  updateTask: (taskId: string, data: TaskUpdateRequest) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
+  toggleComplete: (taskId: string) => Promise<void>;
+  refresh: () => Promise<void>;
+}
+```
+
+**Behavior**:
+- Fetch tasks on mount with pagination
+- Cache tasks in state
+- Optimistic updates for toggleComplete
+- Refetch after mutations
+
+---
+
+## Layout Component Contracts
+
+### RootLayout
+
+**Location**: `src/app/layout.tsx`
+
+**Route**: All routes
+
+**Features**:
+- HTML5 boilerplate
+- Meta tags
+- Global CSS (Tailwind)
+- AuthContext provider
+
+---
+
+### AuthLayout
+
+**Location**: `src/app/(auth)/layout.tsx`
+
+**Route**: `/sign-in`, `/sign-up`
+
+**Features**:
+- Centered card layout
+- Logo/branding
+- Auth navigation (sign in/sign up links)
+
+---
+
+### DashboardLayout
+
+**Location**: `src/app/(dashboard)/layout.tsx`
+
+**Route**: `/tasks/*`
+
+**Features**:
+- Top navigation bar
+- User menu (email, sign out)
+- Protected route (redirect if not authenticated)
+
+---
+
+## Styling Contract
+
+### Tailwind Configuration
+
+```typescript
+// tailwind.config.ts
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        },
+        danger: {
+          500: '#ef4444',
+          600: '#dc2626',
+        },
+        success: {
+          500: '#10b981',
+        },
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+      },
+    },
+  },
+}
+```
+
+### Responsive Breakpoints
+
+- Mobile: `sm:` (640px+)
+- Tablet: `md:` (768px+)
+- Desktop: `lg:` (1024px+)
+- Large Desktop: `xl:` (1280px+)
+
+---
+
+All components follow React best practices:
+- Functional components with hooks
+- TypeScript types for all props
+- Controlled components for forms
+- Prop drilling minimized via Context
+- Server Components where appropriate (Next.js 16+)
