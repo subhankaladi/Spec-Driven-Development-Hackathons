@@ -10,7 +10,7 @@
 import { useChat } from '@/hooks/useChat';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
-import { ReAuthenticationModal } from '../Auth/ReAuthenticationModal';
+import { ReAuthenticationModal } from '../auth/ReAuthenticationModal';
 import { ErrorBanner } from './ErrorBanner';
 import { ConversationList } from './ConversationList';
 import { useState } from 'react';

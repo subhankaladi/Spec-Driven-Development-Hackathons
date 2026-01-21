@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChatWindow } from '@/components/Chat/ChatWindow';
-import { AuthGuard } from '@/components/Auth/AuthGuard';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import { validateDomainAllowlist } from '@/utils/domain';
 
 export default function ChatPage() {
