@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Dark Red Outline Theme */
+:root {
+  --background: #0B0A0A;
+  --foreground: #E5E7EB;
+  --card-bg: #111010;
+  --card-hover: #1A1919;
+  --border: #8B1E1E;
+  --primary: #8B1E1E;
+  --primary-hover: #B11226;
+  --accent: #B11226;
+  --dark-red: #8B1E1E;
+  --bright-red: #B11226;
+  --off-white: #E5E7EB;
+  --light-gray: #D1D5DB;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111010;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8B1E1E;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B11226;
+}
+
+/* Selection */
+::selection {
+  background: rgba(139, 30, 30, 0.3);
+  color: #E5E7EB;
+}
+
+/* Focus Styles */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Glow effect for hover */
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 10px rgba(139, 30, 30, 0.5);
+}
