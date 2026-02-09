@@ -9,35 +9,49 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Dark Red Outline Theme Colors
+        // Modern Dark Theme Colors
         background: {
-          dark: '#0B0A0A',
+          dark: '#0a0a0a',
           darker: '#050505',
-          card: '#111010',
-          hover: '#1A1919',
+          card: '#1a1a1a',
+          hover: '#252525',
         },
         primary: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
+        accent: {
+          purple: '#a855f7',
+          pink: '#ec4899',
+          cyan: '#06b6d4',
+          emerald: '#10b981',
+        },
+        danger: {
           400: '#f87171',
           500: '#ef4444',
           600: '#dc2626',
           700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
-          DEFAULT: '#8B1E1E', // Dark red
         },
-        accent: {
-          red: '#B11226', // Brighter red
+        success: {
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
         },
-        'dark-red': '#8B1E1E',
-        'bright-red': '#B11226',
-        'off-white': '#E5E7EB',
+        warning: {
+          400: '#facc15',
+          500: '#eab308',
+          600: '#ca8a04',
+        },
         gray: {
           850: '#1f1f1f',
-          900: '#111010',
           950: '#0f0f0f',
         },
       },
@@ -49,8 +63,8 @@ const config: Config = {
         '2xl': '1536px',
       },
       boxShadow: {
-        'glow-red': '0 0 20px rgba(139, 30, 30, 0.3)',
-        'glow-bright-red': '0 0 20px rgba(177, 18, 38, 0.5)',
+        'glow-primary': '0 0 20px rgba(14, 165, 233, 0.3)',
+        'glow-accent': '0 0 20px rgba(168, 85, 247, 0.3)',
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
       },
       borderRadius: {

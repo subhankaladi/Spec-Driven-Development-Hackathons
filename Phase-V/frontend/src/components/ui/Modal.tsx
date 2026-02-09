@@ -57,11 +57,11 @@ export function Modal({ isOpen, title, onClose, children, actions }: ModalProps)
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-background-card border border-dark-red rounded-2xl shadow-2xl max-w-lg w-full"
+          className="relative bg-background-card border border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-dark-red">
+          <div className="flex items-center justify-between p-6 border-b border-gray-800">
             {title && (
               <h3 id="modal-title" className="text-xl font-semibold text-gray-100">
                 {title}
@@ -69,7 +69,7 @@ export function Modal({ isOpen, title, onClose, children, actions }: ModalProps)
             )}
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-300 hover:bg-background-hover p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-red transition-colors"
+              className="text-gray-400 hover:text-gray-300 hover:bg-background-hover p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
             >
               <span className="sr-only">Close</span>
               <svg
@@ -93,7 +93,7 @@ export function Modal({ isOpen, title, onClose, children, actions }: ModalProps)
 
           {/* Actions */}
           {actions && (
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-dark-red">
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-800">
               {actions}
             </div>
           )}

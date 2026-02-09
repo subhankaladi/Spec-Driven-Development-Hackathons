@@ -2,8 +2,8 @@
 
 import { AuthContextProvider } from '@/context/AuthContext';
 
-// Wrapper component that integrates BetterAuth with the existing AuthContext
-// The authClient is initialized in the client.ts file
+// Wrapper component that provides the JWT-based authentication context
+// This component wraps the entire app to provide auth context to all components
 export function BetterAuthProvider({
   children
 }: {

@@ -1,4 +1,4 @@
-// T020: AuthContext with AuthContextProvider - Updated for BetterAuth
+// T020: AuthContext with AuthContextProvider - Updated for JWT-only authentication
 
 'use client';
 
@@ -28,6 +28,25 @@ function parseJwt(token: string) {
   }
 }
 
+// Helper function to check if token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    const decoded = parseJwt(token);
+    if (!decoded || !decoded.exp) {
+      return true; // If there's no expiration, consider it expired
+    }
+    
+    // Convert expiration time from seconds to milliseconds
+    const expTime = decoded.exp * 1000;
+    const currentTime = Date.now();
+    
+    return currentTime >= expTime;
+  } catch (error) {
+    console.error('Error checking token expiration:', error);
+    return true;
+  }
+}
+
 export function AuthContextProvider({ children }: { children: ReactNode }) {
   const authHook = useBetterAuth();
   const [authState, setAuthState] = useState<AuthState>({
@@ -41,7 +60,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   // Check for existing token on initial load and decode user info
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    if (token) {
+    if (token && !isTokenExpired(token)) {
       const decoded = parseJwt(token);
       if (decoded) {
         const user: User = {
@@ -56,6 +75,15 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
           isAuthenticated: true
         });
       }
+    } else {
+      // Token is expired or doesn't exist, clear it
+      localStorage.removeItem('access_token');
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+        isAuthenticated: false
+      });
     }
   }, []);
 
@@ -66,7 +94,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
 
       // After successful sign in, get the token and decode user info
       const token = localStorage.getItem('access_token');
-      if (token) {
+      if (token && !isTokenExpired(token)) {
         const decoded = parseJwt(token);
         if (decoded) {
           const user: User = {
@@ -80,6 +108,8 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             error: null,
             isAuthenticated: true
           });
+          // Redirect to tasks page after successful authentication
+          router.push('/tasks');
         }
       }
     } catch (error: any) {
@@ -101,7 +131,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
 
       // After successful sign up, get the token and decode user info
       const token = localStorage.getItem('access_token');
-      if (token) {
+      if (token && !isTokenExpired(token)) {
         const decoded = parseJwt(token);
         if (decoded) {
           const user: User = {
@@ -115,6 +145,8 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             error: null,
             isAuthenticated: true
           });
+          // Redirect to tasks page after successful authentication
+          router.push('/tasks');
         }
       }
     } catch (error: any) {
@@ -132,6 +164,9 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await authHook.signOut();
+      // Clear local storage and state
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       setAuthState({
         user: null,
         loading: false,
@@ -142,6 +177,8 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Sign out error:', error);
       // Even if sign out fails, clear local state
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       setAuthState({
         user: null,
         loading: false,
@@ -153,8 +190,40 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshAuth = async () => {
-    // In a real implementation, you might want to validate the token
-    // This function is maintained for compatibility
+    // Check if current token is still valid
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      if (isTokenExpired(token)) {
+        // Token is expired, clear it and update state
+        localStorage.removeItem('access_token');
+        setAuthState({
+          user: null,
+          loading: false,
+          error: null,
+          isAuthenticated: false
+        });
+        // Only redirect if not already on sign-in page
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/signin')) {
+          router.push('/signin');
+        }
+      } else {
+        // Token is still valid, update user info if needed
+        const decoded = parseJwt(token);
+        if (decoded) {
+          const user: User = {
+            id: decoded.sub,
+            email: decoded.email,
+            token: token
+          };
+          setAuthState({
+            user,
+            loading: false,
+            error: null,
+            isAuthenticated: true
+          });
+        }
+      }
+    }
   };
 
   return (

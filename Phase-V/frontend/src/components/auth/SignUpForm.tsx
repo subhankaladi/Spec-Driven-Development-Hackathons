@@ -119,6 +119,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
     try {
       setFormState((prev) => ({ ...prev, isSubmitting: true, errors: {} }));
       await signUp(formState.email, formState.password);
+      // The redirect is now handled by AuthContext, so we don't need to do anything here
       onSuccess?.();
     } catch (error: any) {
       setFormState((prev) => ({

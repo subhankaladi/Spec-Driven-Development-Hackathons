@@ -34,10 +34,10 @@ export function Input({
         className={`
           w-full px-4 py-2.5 bg-background-card border rounded-xl
           text-gray-100 placeholder-gray-500
-          focus:outline-none focus:ring-2 focus:ring-dark-red focus:border-transparent
+          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
           transition-all duration-200
           disabled:bg-background-hover disabled:cursor-not-allowed
-          ${showError ? 'border-danger-500 focus:ring-danger-500' : 'border-dark-red hover:border-bright-red'}
+          ${showError ? 'border-danger-500 focus:ring-danger-500' : 'border-gray-800 hover:border-gray-700'}
           ${className}
         `}
         aria-invalid={showError ? "true" : "false"}

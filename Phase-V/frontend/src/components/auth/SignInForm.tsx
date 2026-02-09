@@ -88,6 +88,7 @@ export function SignInForm({ onSuccess, initialEmail = '' }: SignInFormProps) {
     try {
       setFormState((prev) => ({ ...prev, isSubmitting: true, errors: {} }));
       await signIn(formState.email, formState.password);
+      // The redirect is now handled by AuthContext, so we don't need to do anything here
       onSuccess?.();
     } catch (error: any) {
       setFormState((prev) => ({
@@ -100,11 +101,11 @@ export function SignInForm({ onSuccess, initialEmail = '' }: SignInFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {formState.errors.general && (
+      {/* {formState.errors.general && (
         <div className="bg-danger-500/10 text-danger-400 border border-danger-500/20 p-3 rounded-xl text-sm" role="alert">
           {formState.errors.general}
         </div>
-      )}
+      )} */}
 
       <Input
         type="email"

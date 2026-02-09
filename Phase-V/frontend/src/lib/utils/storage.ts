@@ -1,4 +1,4 @@
-// T016: Storage utility functions for BetterAuth compatibility
+// T016: Storage utility functions for JWT-based authentication
 
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -8,8 +8,7 @@ export interface AuthTokens {
   refresh_token: string;
 }
 
-// These functions are kept for backward compatibility but may not be actively used
-// with BetterAuth as it manages sessions via cookies
+// Utility functions for managing JWT tokens in localStorage
 
 export function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null;

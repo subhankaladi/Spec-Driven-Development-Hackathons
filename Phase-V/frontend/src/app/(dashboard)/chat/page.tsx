@@ -14,20 +14,22 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
  */
 export default function ChatPage() {
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-400 to-accent-purple bg-clip-text text-transparent mb-2">
-          Chat with AI Assistant
-        </h1>
-        <p className="text-gray-400">
-          Ask me to create, list, update, or delete your tasks using natural language
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#0B0B0B] p-3 sm:p-4 md:p-6">
+      <div className="max-w-full mx-auto h-full">
+        {/* Page header */}
+        <div className="mb-3 sm:mb-4 md:mb-6 py-3 sm:py-4 border-b border-[#E25555]/30">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#E25555] mb-1">
+            Chat with AI Assistant
+          </h1>
+          <p className="text-gray-400 text-xs sm:text-sm">
+            Ask me to create, list, update, or delete your tasks using natural language
+          </p>
+        </div>
 
-      {/* Chat interface - takes remaining height */}
-      <div className="flex-1 min-h-0">
-        <ChatInterface />
+        {/* Chat interface - takes remaining height */}
+        <div className="bg-[#111111] rounded-lg sm:rounded-xl border border-[#E25555]/30 p-3 sm:p-4 md:p-6 h-[calc(100vh-180px)] sm:h-[calc(100vh-200px)] md:h-[calc(100vh-220px)] min-h-[50vh]">
+          <ChatInterface />
+        </div>
       </div>
     </div>
   );
