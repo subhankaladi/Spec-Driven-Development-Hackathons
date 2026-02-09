@@ -3,7 +3,7 @@
 export interface User {
   id: string;           // UUID from JWT sub claim
   email: string;        // User's email address
-  token?: string;       // JWT access token (optional for BetterAuth compatibility)
+  token?: string;       // JWT access token
 }
 
 export interface AuthState {

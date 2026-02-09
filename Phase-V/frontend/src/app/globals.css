@@ -1,19 +1,15 @@
 @import "tailwindcss";
 
-/* Dark Red Outline Theme */
+/* Modern Dark Theme */
 :root {
-  --background: #0B0A0A;
-  --foreground: #E5E7EB;
-  --card-bg: #111010;
-  --card-hover: #1A1919;
-  --border: #8B1E1E;
-  --primary: #8B1E1E;
-  --primary-hover: #B11226;
-  --accent: #B11226;
-  --dark-red: #8B1E1E;
-  --bright-red: #B11226;
-  --off-white: #E5E7EB;
-  --light-gray: #D1D5DB;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-bg: #1a1a1a;
+  --card-hover: #252525;
+  --border: #2a2a2a;
+  --primary: #0ea5e9;
+  --primary-hover: #0284c7;
+  --accent: #a855f7;
 }
 
 @theme inline {
@@ -38,35 +34,26 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #111010;
+  background: #1a1a1a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #8B1E1E;
+  background: #3a3a3a;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B11226;
+  background: #4a4a4a;
 }
 
 /* Selection */
 ::selection {
-  background: rgba(139, 30, 30, 0.3);
-  color: #E5E7EB;
+  background: rgba(14, 165, 233, 0.3);
+  color: #ededed;
 }
 
 /* Focus Styles */
 *:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-}
-
-/* Glow effect for hover */
-.hover-glow {
-  transition: box-shadow 0.3s ease;
-}
-
-.hover-glow:hover {
-  box-shadow: 0 0 10px rgba(139, 30, 30, 0.5);
 }

@@ -15,10 +15,10 @@ export function Checkbox({ label, className = '', id, ...props }: CheckboxProps)
         id={checkboxId}
         type="checkbox"
         className={`
-          h-5 w-5 rounded-md border-2 border-dark-red bg-background-dark text-dark-red
-          focus:ring-2 focus:ring-dark-red focus:ring-offset-2 focus:ring-offset-background-dark
-          hover:border-bright-red transition-colors
-          checked:bg-dark-red checked:border-dark-red
+          h-5 w-5 rounded-md border-2 border-gray-700 bg-background-dark text-primary-500
+          focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-background-dark
+          hover:border-primary-500 transition-colors
+          checked:bg-primary-500 checked:border-primary-500
           cursor-pointer
           disabled:opacity-50 disabled:cursor-not-allowed
           ${className}

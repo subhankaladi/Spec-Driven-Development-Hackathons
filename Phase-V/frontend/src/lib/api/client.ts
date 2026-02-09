@@ -1,15 +1,14 @@
-// T017: Axios client with interceptors for BetterAuth cookies
+// T017: Axios client with interceptors for JWT Bearer tokens
 
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { ErrorResponse } from '@/types/api';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
+  baseURL: process.env.BACKEND_URL || 'https://subhankaladi-phase-3-backend.hf.space',
   headers: {
     'Content-Type': 'application/json',
   },
-  // Enable sending cookies with requests for BetterAuth session handling
-  withCredentials: true,
+  // Removed withCredentials as we're using JWT tokens instead of cookies
 });
 
 // Request interceptor: Add Authorization header with JWT token from localStorage
@@ -51,7 +50,7 @@ apiClient.interceptors.response.use(
     const errorMessage =
       error.response?.data?.error?.message ||
       error.message ||
-      'An unexpected error occurred';
+      'Try again later, or contact support.';
 
     return Promise.reject(new Error(errorMessage));
   }

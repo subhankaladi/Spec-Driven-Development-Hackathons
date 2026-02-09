@@ -2,8 +2,8 @@ import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import apiClient from '@/lib/api/client';
 
-// For now, since BetterAuth uses atoms instead of standard hooks, we'll create a simple wrapper
-// that works with our existing system but represents the BetterAuth integration
+// Pure JWT-based auth hook without BetterAuth dependencies
+// This hook handles the API calls but not the navigation - that's handled by AuthContext
 interface User {
   id: string;
   email: string;
@@ -28,6 +28,7 @@ export function useBetterAuth(): AuthContextType {
   const router = useRouter();
 
   // Direct API calls to match our backend endpoints
+  // Navigation is handled by the AuthContext after successful auth
   const signInHandler = useCallback(async (email: string, password: string) => {
     try {
       const response = await apiClient.post('/auth/auth/signin', {
@@ -38,7 +39,8 @@ export function useBetterAuth(): AuthContextType {
       if (response.data.access_token) {
         // Store the token in localStorage for use with API calls
         localStorage.setItem('access_token', response.data.access_token);
-        router.push('/tasks');
+        // Don't navigate here - let AuthContext handle it
+        return response.data;
       } else {
         throw new Error('Sign in failed - no token received');
       }
@@ -46,7 +48,7 @@ export function useBetterAuth(): AuthContextType {
       const errorMessage = error.response?.data?.error?.message || error.message || 'Sign in failed';
       throw new Error(errorMessage);
     }
-  }, [router]);
+  }, []);
 
   const signUpHandler = useCallback(async (email: string, password: string) => {
     try {
@@ -58,7 +60,8 @@ export function useBetterAuth(): AuthContextType {
       if (response.data.access_token) {
         // Store the token in localStorage for use with API calls
         localStorage.setItem('access_token', response.data.access_token);
-        router.push('/tasks');
+        // Don't navigate here - let AuthContext handle it
+        return response.data;
       } else {
         throw new Error('Sign up failed - no token received');
       }
@@ -66,21 +69,25 @@ export function useBetterAuth(): AuthContextType {
       const errorMessage = error.response?.data?.error?.message || error.message || 'Sign up failed';
       throw new Error(errorMessage);
     }
-  }, [router]);
+  }, []);
 
   const signOutHandler = useCallback(async () => {
     try {
       // Clear the stored token
       localStorage.removeItem('access_token');
-      router.push('/signin');
+      // Also clear any other auth-related storage
+      localStorage.removeItem('refresh_token');
+      // Don't navigate here - let AuthContext handle it
     } catch (error) {
-      // Even if sign out fails, redirect to sign in
-      router.push('/signin');
+      // Even if sign out fails, clear local storage
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
     }
-  }, [router]);
+  }, []);
 
   const refreshAuth = useCallback(() => {
     // Session refreshing would happen automatically with JWT
+    // In a real implementation, you might want to refresh the token here
   }, []);
 
   // Return initial state - the actual state will be managed by AuthContext

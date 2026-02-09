@@ -3,7 +3,7 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   children: React.ReactNode;
@@ -21,11 +21,10 @@ export function Button({
   const baseClasses = 'font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantClasses = {
-    primary: 'bg-dark-red text-white hover:bg-bright-red hover:shadow-glow-red focus:ring-dark-red',
-    secondary: 'bg-background-card text-off-white hover:bg-background-hover border border-gray-800 focus:ring-gray-700',
+    primary: 'bg-primary-500 text-white hover:bg-primary-600 hover:shadow-glow-primary focus:ring-primary-500',
+    secondary: 'bg-background-card text-gray-200 hover:bg-background-hover border border-gray-800 focus:ring-gray-700',
     danger: 'bg-danger-500 text-white hover:bg-danger-600 hover:shadow-lg focus:ring-danger-500',
-    ghost: 'bg-transparent text-dark-red hover:bg-background-card hover:text-bright-red focus:ring-dark-red',
-    outline: 'bg-transparent text-dark-red border border-dark-red hover:bg-dark-red hover:text-white focus:ring-dark-red'
+    ghost: 'bg-transparent text-primary-400 hover:bg-background-card hover:text-primary-300 focus:ring-primary-500',
   };
 
   const sizeClasses = {
