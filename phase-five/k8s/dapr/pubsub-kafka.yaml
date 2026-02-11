@@ -1,0 +1,69 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    # Kafka broker addresses
+    - name: brokers
+      value: "strimzi-kafka-broker:9092"  # Replace with managed Kafka endpoint in production
+    # Consumer group for event processing
+    - name: consumerGroup
+      value: "dapr-consumer"
+    # Authentication (if needed)
+    # - name: authType
+    #   value: "sasl"
+    # - name: saslUsername
+    #   secretKeyRef:
+    #     name: kafka-credentials
+    #     key: username
+    # - name: saslPassword
+    #   secretKeyRef:
+    #     name: kafka-credentials
+    #     key: password
+    # - name: saslMechanism
+    #   value: "sha512"
+    # TLS (if needed)
+    # - name: tlsEnabled
+    #   value: "true"
+    # - name: tlsCertFile
+    #   value: "/etc/dapr/certs/kafka.crt"
+    # - name: tlsKeyFile
+    #   value: "/etc/dapr/certs/kafka.key"
+    # - name: tlsCaFile
+    #   value: "/etc/dapr/certs/ca.crt"
+    # Partition strategy
+    - name: clientID
+      value: "dapr-client"
+    - name: version
+      value: "2.8.0"
+    # Enable offset storage for reliability
+    - name: offsetStorage
+      value: "broker"
+---
+# Kafka topics configuration (optional - can be created manually)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-topics-config
+data:
+  topics.yaml: |
+    topics:
+      - name: task-events
+        partitions: 3
+        replicationFactor: 1
+        config:
+          retention.ms: "604800000"  # 7 days
+          cleanup.policy: "delete"
+      - name: reminders
+        partitions: 2
+        replicationFactor: 1
+        config:
+          retention.ms: "259200000"  # 3 days
+      - name: task-updates
+        partitions: 3
+        replicationFactor: 1
+        config:
+          retention.ms: "86400000"   # 1 day

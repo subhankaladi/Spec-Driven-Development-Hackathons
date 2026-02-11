@@ -1,0 +1,29 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kubernetes-jobs
+spec:
+  type: jobs.kubernetes
+  version: v1
+  metadata:
+    # Namespace for scheduled jobs
+    - name: namespace
+      value: "default"  # Change to your deployment namespace
+    # Image pull policy
+    - name: imagePullPolicy
+      value: "IfNotPresent"
+    # Scheduling backend settings
+    - name: authorizationTokenFile
+      value: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    # Job image (optional - for custom job runners)
+    # - name: image
+    #   value: "your-job-runner-image:latest"
+    # Request limits for jobs
+    - name: cpuRequest
+      value: "100m"
+    - name: cpuLimit
+      value: "500m"
+    - name: memoryRequest
+      value: "128Mi"
+    - name: memoryLimit
+      value: "256Mi"

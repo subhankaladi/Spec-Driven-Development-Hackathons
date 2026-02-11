@@ -1,0 +1,41 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: postgres-state
+spec:
+  type: state.postgresql
+  version: v1
+  metadata:
+    # Connection string (from Kubernetes secret)
+    - name: connectionString
+      secretKeyRef:
+        name: postgres-credentials
+        key: connectionString
+    # Connection pooling settings
+    - name: maxConns
+      value: "25"
+    - name: connMaxLifetime
+      value: "5m"
+    - name: connMaxIdleTime
+      value: "2m"
+    # Retry settings
+    - name: maxRetries
+      value: "3"
+    # Table settings
+    - name: tableName
+      value: "dapr_state"
+    - name: schemaName
+      value: "public"
+    # Timeout settings
+    - name: queryTimeout
+      value: "30s"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+type: Opaque
+stringData:
+  # Format: postgresql://user:password@host:port/database
+  # This should be replaced with actual Neon database connection string
+  connectionString: "postgresql://todouser:todopass@postgres:5432/tododb"
