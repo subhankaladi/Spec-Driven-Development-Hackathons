@@ -1,0 +1,34 @@
+# Local development values for Minikube deployment
+
+global:
+  environment: local
+  imagePullPolicy: Never  # Use local images with Minikube
+  namespace: default
+
+dapr:
+  enabled: true
+
+kafka:
+  enabled: true
+  brokers: "strimzi-kafka-broker:9092"
+
+microservices:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+local:
+  enabled: true
+  minikube: true
+  strimzi:
+    enabled: true
+    brokers: 1
+    persistence: false
+
+production:
+  enabled: false

@@ -1,0 +1,71 @@
+# Default values for todo-system (umbrella chart)
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global settings
+global:
+  environment: local # local, staging, production
+  imagePullPolicy: IfNotPresent
+  registry: docker.io
+  namespace: default
+
+# Dapr configuration
+dapr:
+  enabled: true
+  chart:
+    version: "1.11.0"
+  config:
+    logging:
+      level: info
+    metrics:
+      enabled: true
+      port: 9090
+
+# Kafka configuration (Strimzi for local, managed for production)
+kafka:
+  enabled: true
+  brokers: "kafka-broker:9092"
+  topics:
+    - name: task-events
+      partitions: 3
+      replication: 1
+    - name: reminders
+      partitions: 2
+      replication: 1
+    - name: task-updates
+      partitions: 3
+      replication: 1
+
+# PostgreSQL configuration
+postgresql:
+  enabled: false # External Neon database in production
+  host: postgres
+  port: 5432
+  database: tododb
+  username: todouser
+  # password should be in secrets
+
+# Microservices deployment settings
+microservices:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Local development (minikube)
+local:
+  enabled: true
+  minikube: true
+  strimzi:
+    enabled: true
+
+# Production settings
+production:
+  enabled: false
+  managedKafka: true
+  externalSecrets: true
+  replicas: 2
