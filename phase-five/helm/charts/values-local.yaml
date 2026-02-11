@@ -1,0 +1,169 @@
+# Phase V - Local Minikube Development Values
+# Used for: helm install todo-system ./helm/charts -f helm/charts/values-local.yaml
+
+global:
+  environment: local
+  imagePullPolicy: Never  # Use local Docker images with Minikube
+  registry: docker.io
+  namespace: default
+
+# Dapr configuration
+dapr:
+  enabled: true
+  mode: standalone  # Can be 'standalone' or 'kubernetes'
+  port: 3500
+
+# Kafka configuration (Strimzi for local development)
+kafka:
+  enabled: true
+  brokers: "strimzi-kafka-broker:9092"
+  topics:
+    - name: task-events
+      partitions: 1
+      replication: 1
+    - name: reminders
+      partitions: 1
+      replication: 1
+    - name: task-updates
+      partitions: 1
+      replication: 1
+
+# PostgreSQL (external Neon in production, local for dev)
+postgresql:
+  enabled: false  # Using external database
+  host: "postgres"
+  port: 5432
+  database: "tododb"
+  username: "todouser"
+  # password should be in secrets
+
+# Microservices configuration
+microservices:
+  replicas: 1
+
+  images:
+    coreTodo:
+      repository: "localhost:5000/phase-v-core-todo"
+      tag: "latest"
+    recurringTask:
+      repository: "localhost:5000/phase-v-recurring-task"
+      tag: "latest"
+    notification:
+      repository: "localhost:5000/phase-v-notification"
+      tag: "latest"
+    auditLog:
+      repository: "localhost:5000/phase-v-audit-log"
+      tag: "latest"
+    websocketSync:
+      repository: "localhost:5000/phase-v-websocket-sync"
+      tag: "latest"
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicas: 1
+  image:
+    repository: "localhost:5000/phase-v-frontend"
+    tag: "latest"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Core Todo Service (extended backend)
+coreTodoService:
+  name: core-todo-service
+  port: 8000
+  replicas: 1
+  enabled: true
+
+# Recurring Task Service
+recurringTaskService:
+  name: recurring-task-service
+  port: 8001
+  replicas: 1
+  enabled: true
+
+# Notification Service
+notificationService:
+  name: notification-service
+  port: 8002
+  replicas: 1
+  enabled: true
+
+# Audit Log Service
+auditLogService:
+  name: audit-log-service
+  port: 8003
+  replicas: 1
+  enabled: true
+
+# WebSocket Sync Service
+websocketSyncService:
+  name: websocket-sync-service
+  port: 8004
+  replicas: 1
+  enabled: true
+
+# Local development settings
+local:
+  enabled: true
+  minikube: true
+  strimzi:
+    enabled: true
+    brokers: 1
+    persistence: false
+  localRegistry:
+    enabled: false  # Set to true if running local Docker registry in Minikube
+    url: "localhost:5000"
+
+# Production settings (disabled for local)
+production:
+  enabled: false
+
+# Storage
+storage:
+  type: ephemeral
+  size: "1Gi"
+
+# Networking
+networking:
+  type: clusterip
+  ingress:
+    enabled: false
+
+# Logging
+logging:
+  level: "info"
+  format: "json"
+
+# Health checks
+healthChecks:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Dapr components
+daprComponents:
+  pubsub:
+    type: kafka
+    brokers: "strimzi-kafka-broker:9092"
+  stateStore:
+    type: postgresql
+    connectionString: "postgresql://todouser:todopass@postgres:5432/tododb"
+  secretsStore:
+    type: kubernetes
+  jobs:
+    type: kubernetes
