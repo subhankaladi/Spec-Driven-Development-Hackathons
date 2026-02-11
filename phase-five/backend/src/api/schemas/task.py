@@ -1,117 +1,62 @@
-"""Task Pydantic schemas for API request/response."""
-from pydantic import BaseModel, ConfigDict, Field
-from datetime import datetime, timezone
-from typing import Optional
+"""Task API schemas (Pydantic models) for Phase V extended features."""
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Any
+from datetime import datetime
 from uuid import UUID
 
 
-class TaskCreate(BaseModel):
-    """Schema for creating a new task."""
-
-    title: str = Field(
-        ...,
-        min_length=1,
-        max_length=255,
-        description="Task title (required, 1-255 characters)"
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="Optional task description"
-    )
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "title": "Buy groceries",
-                "description": "Milk, eggs, bread"
-            }
-        }
-    )
+class RecurrenceRuleSchema(BaseModel):
+    """Recurrence rule for recurring tasks."""
+    frequency: str = Field(..., description="daily, weekly, or monthly")
+    end_date: Optional[str] = Field(None, description="Optional end date for recurrence")
 
 
-class TaskUpdate(BaseModel):
-    """Schema for updating an existing task."""
+class TaskCreateRequest(BaseModel):
+    """Request body for creating a task."""
+    title: str = Field(..., min_length=1, max_length=255, description="Task title")
+    description: Optional[str] = Field(None, description="Optional task description")
+    due_at: Optional[datetime] = Field(None, description="Optional due date/time")
+    remind_at: Optional[datetime] = Field(None, description="Optional reminder time")
+    priority: str = Field("medium", description="Task priority: low, medium, high")
+    tags: Optional[List[str]] = Field([], description="Optional tags")
+    recurrence_rule: Optional[RecurrenceRuleSchema] = Field(None, description="Optional recurrence configuration")
 
-    title: Optional[str] = Field(
-        default=None,
-        min_length=1,
-        max_length=255,
-        description="Task title (optional)"
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="Optional task description"
-    )
-    is_completed: Optional[bool] = Field(
-        default=None,
-        description="Completion status"
-    )
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "title": "Buy groceries and supplies",
-                "description": "Milk, eggs, bread, butter",
-                "is_completed": True
-            }
-        }
-    )
+class TaskUpdateRequest(BaseModel):
+    """Request body for updating a task (all fields optional)."""
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = None
+    is_completed: Optional[bool] = None
+    due_at: Optional[datetime] = None
+    remind_at: Optional[datetime] = None
+    priority: Optional[str] = None
+    tags: Optional[List[str]] = None
+    recurrence_rule: Optional[RecurrenceRuleSchema] = None
 
 
 class TaskResponse(BaseModel):
-    """Schema for task response."""
+    """Complete task response with all Phase V fields."""
+    id: UUID
+    user_id: UUID
+    title: str
+    description: Optional[str]
+    is_completed: bool
+    due_at: Optional[datetime]
+    remind_at: Optional[datetime]
+    priority: str
+    tags: List[str]
+    recurrence_rule: Optional[Dict[str, Any]]
+    next_occurrence_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
 
-    id: UUID = Field(..., description="Unique task identifier")
-    user_id: UUID = Field(..., description="Owning user identifier")
-    title: str = Field(..., description="Task title")
-    description: Optional[str] = Field(default=None, description="Task description")
-    is_completed: bool = Field(..., description="Completion status")
-    created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_schema_extra={
-            "example": {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                "title": "Buy groceries",
-                "description": "Milk, eggs, bread",
-                "is_completed": False,
-                "created_at": "2026-01-07T10:30:00Z",
-                "updated_at": "2026-01-07T10:30:00Z"
-            }
-        }
-    )
+    class Config:
+        from_attributes = True
 
 
 class TaskListResponse(BaseModel):
-    """Schema for paginated task list response."""
-
-    items: list[TaskResponse] = Field(..., description="List of tasks")
-    total: int = Field(..., description="Total number of tasks")
-    page: int = Field(..., description="Current page number")
-    page_size: int = Field(..., description="Items per page")
-    total_pages: int = Field(..., description="Total number of pages")
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "items": [
-                    {
-                        "id": "550e8400-e29b-41d4-a716-446655440000",
-                        "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                        "title": "Buy groceries",
-                        "description": "Milk, eggs, bread",
-                        "is_completed": False,
-                        "created_at": "2026-01-07T10:30:00Z",
-                        "updated_at": "2026-01-07T10:30:00Z"
-                    }
-                ],
-                "total": 1,
-                "page": 1,
-                "page_size": 20,
-                "total_pages": 1
-            }
-        }
-    )
+    """Paginated list of tasks."""
+    items: List[TaskResponse]
+    total: int
+    limit: int
+    offset: int
