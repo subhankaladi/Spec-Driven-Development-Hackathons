@@ -1,0 +1,435 @@
+---
+# Production RBAC for Phase V microservices on Kubernetes
+# This provides principle of least privilege for each service
+
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: todo-system
+  labels:
+    environment: production
+    app: todo-system
+
+---
+# Service Account for Core Todo Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: core-todo-sa
+  namespace: todo-system
+
+---
+# Role for Core Todo Service (creates/updates tasks, publishes events)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: core-todo-role
+  namespace: todo-system
+rules:
+  # Allow read of Dapr secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - postgres-secrets
+      - jwt-secrets
+      - api-key-secrets
+    verbs: ["get"]
+  # Allow pod logs (debugging)
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+
+---
+# RoleBinding for Core Todo Service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: core-todo-rolebinding
+  namespace: todo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: core-todo-role
+subjects:
+  - kind: ServiceAccount
+    name: core-todo-sa
+    namespace: todo-system
+
+---
+# Service Account for Recurring Task Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: recurring-task-sa
+  namespace: todo-system
+
+---
+# Role for Recurring Task Service (read-only state store access)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: recurring-task-role
+  namespace: todo-system
+rules:
+  # Read only access to secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - postgres-secrets
+    verbs: ["get"]
+  # Pod logs for debugging
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+
+---
+# RoleBinding for Recurring Task Service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: recurring-task-rolebinding
+  namespace: todo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: recurring-task-role
+subjects:
+  - kind: ServiceAccount
+    name: recurring-task-sa
+    namespace: todo-system
+
+---
+# Service Account for Notification Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: notification-sa
+  namespace: todo-system
+
+---
+# Role for Notification Service (minimal permissions)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: notification-role
+  namespace: todo-system
+rules:
+  # Pod logs only
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+
+---
+# RoleBinding for Notification Service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: notification-rolebinding
+  namespace: todo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: notification-role
+subjects:
+  - kind: ServiceAccount
+    name: notification-sa
+    namespace: todo-system
+
+---
+# Service Account for Audit Log Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: audit-log-sa
+  namespace: todo-system
+
+---
+# Role for Audit Log Service (read secrets, write logs)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: audit-log-role
+  namespace: todo-system
+rules:
+  # Read database secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - postgres-secrets
+    verbs: ["get"]
+  # Pod logs
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+
+---
+# RoleBinding for Audit Log Service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: audit-log-rolebinding
+  namespace: todo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: audit-log-role
+subjects:
+  - kind: ServiceAccount
+    name: audit-log-sa
+    namespace: todo-system
+
+---
+# Service Account for WebSocket Sync Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: websocket-sync-sa
+  namespace: todo-system
+
+---
+# Role for WebSocket Sync Service (in-memory only)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: websocket-sync-role
+  namespace: todo-system
+rules:
+  # Pod logs only
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+
+---
+# RoleBinding for WebSocket Sync Service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: websocket-sync-rolebinding
+  namespace: todo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: websocket-sync-role
+subjects:
+  - kind: ServiceAccount
+    name: websocket-sync-sa
+    namespace: todo-system
+
+---
+# Service Account for Frontend
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend-sa
+  namespace: todo-system
+
+---
+# Role for Frontend (read secrets)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: frontend-role
+  namespace: todo-system
+rules:
+  # Read only secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - api-key-secrets
+    verbs: ["get"]
+  # Pod logs
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+
+---
+# RoleBinding for Frontend
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: frontend-rolebinding
+  namespace: todo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: frontend-role
+subjects:
+  - kind: ServiceAccount
+    name: frontend-sa
+    namespace: todo-system
+
+---
+# Cluster-level permissions for Dapr
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dapr-operator-role
+rules:
+  # Dapr operator needs to manage components
+  - apiGroups: ["dapr.io"]
+    resources: ["components"]
+    verbs: ["get", "list", "watch"]
+  # Dapr needs to read service accounts
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list"]
+  # Dapr needs pod info
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dapr-operator-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dapr-operator-role
+subjects:
+  - kind: ServiceAccount
+    name: dapr-operator
+    namespace: dapr-system
+
+---
+# Network Policy for traffic control
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: todo-system-network-policy
+  namespace: todo-system
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 8001
+        - protocol: TCP
+          port: 8002
+        - protocol: TCP
+          port: 8003
+        - protocol: TCP
+          port: 8004
+        - protocol: TCP
+          port: 3000  # Frontend
+    # Allow from Dapr sidecars
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: todo-system
+      ports:
+        - protocol: TCP
+          port: 3500  # Dapr port
+  egress:
+    # Allow to Kafka
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9092
+    # Allow to PostgreSQL
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow DNS
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow HTTPS (for external APIs)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+# Pod Security Policy
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: todo-system-psp
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'MustRunAs'
+    seLinuxOptions:
+      level: 's0:c123,c456'
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1000
+        max: 65535
+  readOnlyRootFilesystem: false
+
+---
+# PodSecurityPolicy Binding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp-restricted
+rules:
+  - apiGroups: ['policy']
+    resources: ['podsecuritypolicies']
+    verbs: ['use']
+    resourceNames:
+      - todo-system-psp
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: psp-restricted
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: psp-restricted
+subjects:
+  - kind: ServiceAccount
+    name: core-todo-sa
+    namespace: todo-system
+  - kind: ServiceAccount
+    name: recurring-task-sa
+    namespace: todo-system
+  - kind: ServiceAccount
+    name: notification-sa
+    namespace: todo-system
+  - kind: ServiceAccount
+    name: audit-log-sa
+    namespace: todo-system
+  - kind: ServiceAccount
+    name: websocket-sync-sa
+    namespace: todo-system
+  - kind: ServiceAccount
+    name: frontend-sa
+    namespace: todo-system

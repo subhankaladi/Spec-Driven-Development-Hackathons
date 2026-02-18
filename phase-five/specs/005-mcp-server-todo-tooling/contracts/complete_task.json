@@ -1,0 +1,63 @@
+{
+  "name": "complete_task",
+  "description": "Mark a task as completed for the authenticated user (specialized update operation)",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "jwt_token": {
+        "type": "string",
+        "description": "JWT authentication token with user identity"
+      },
+      "task_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Task ID to mark as complete"
+      }
+    },
+    "required": ["jwt_token", "task_id"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "string", "format": "uuid"},
+      "user_id": {"type": "string", "format": "uuid"},
+      "title": {"type": "string"},
+      "description": {"type": ["string", "null"]},
+      "is_completed": {
+        "type": "boolean",
+        "description": "Always true after completion",
+        "const": true
+      },
+      "created_at": {"type": "string", "format": "date-time"},
+      "updated_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Timestamp refreshed on completion"
+      }
+    },
+    "required": ["id", "user_id", "title", "description", "is_completed", "created_at", "updated_at"]
+  },
+  "idempotency": "Calling complete_task on an already-completed task succeeds and returns the task unchanged",
+  "errors": [
+    {
+      "code": "AUTHENTICATION_ERROR",
+      "message": "Missing, invalid, or expired JWT token"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "message": "Invalid task_id format"
+    },
+    {
+      "code": "NOT_FOUND_ERROR",
+      "message": "Task not found"
+    },
+    {
+      "code": "AUTHORIZATION_ERROR",
+      "message": "Task belongs to different user"
+    },
+    {
+      "code": "DATABASE_ERROR",
+      "message": "Database operation failed"
+    }
+  ]
+}

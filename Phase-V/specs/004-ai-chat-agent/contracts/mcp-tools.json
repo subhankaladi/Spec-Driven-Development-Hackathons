@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MCP Tools for AI Chat Agent",
+  "description": "Model Context Protocol tool definitions for task management operations",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "create_task",
+      "description": "Create a new task for the authenticated user",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Task title (required, 1-255 characters)"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional task description"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID from JWT token (enforced by system)"
+          }
+        },
+        "required": ["title", "user_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created task ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Task title"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Task description"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "description": "Completion status (always false for new tasks)"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          }
+        },
+        "required": ["id", "title", "is_completed", "created_at"]
+      },
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "message": "Title is required and must be 1-255 characters"
+        },
+        {
+          "code": "UNAUTHORIZED",
+          "message": "User ID does not match authenticated user"
+        }
+      ]
+    },
+    {
+      "name": "list_tasks",
+      "description": "List tasks for the authenticated user with optional filtering",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID from JWT token (enforced by system)"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Filter by completion status (null = all tasks)"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 10,
+            "description": "Maximum number of tasks to return"
+          }
+        },
+        "required": ["user_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "is_completed": {
+              "type": "boolean"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": ["id", "title", "is_completed", "created_at", "updated_at"]
+        },
+        "description": "Array of tasks (empty array if no tasks)"
+      },
+      "errors": [
+        {
+          "code": "UNAUTHORIZED",
+          "message": "User ID does not match authenticated user"
+        }
+      ]
+    },
+    {
+      "name": "update_task",
+      "description": "Update an existing task for the authenticated user",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Task ID to update"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID from JWT token (enforced by system)"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "nullable": true,
+            "description": "New task title (null = no change)"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "New task description (null = no change)"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "New completion status (null = no change)"
+          }
+        },
+        "required": ["task_id", "user_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_completed": {
+            "type": "boolean"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Update timestamp"
+          }
+        },
+        "required": ["id", "title", "is_completed", "updated_at"]
+      },
+      "errors": [
+        {
+          "code": "TASK_NOT_FOUND",
+          "message": "Task does not exist or does not belong to user"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "message": "Title must be 1-255 characters if provided"
+        },
+        {
+          "code": "UNAUTHORIZED",
+          "message": "User ID does not match authenticated user or task owner"
+        }
+      ]
+    },
+    {
+      "name": "delete_task",
+      "description": "Delete a task for the authenticated user",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Task ID to delete"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID from JWT token (enforced by system)"
+          }
+        },
+        "required": ["task_id", "user_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether deletion succeeded"
+          },
+          "deleted_task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of deleted task"
+          }
+        },
+        "required": ["success", "deleted_task_id"]
+      },
+      "errors": [
+        {
+          "code": "TASK_NOT_FOUND",
+          "message": "Task does not exist or does not belong to user"
+        },
+        {
+          "code": "UNAUTHORIZED",
+          "message": "User ID does not match authenticated user or task owner"
+        }
+      ]
+    }
+  ],
+  "notes": {
+    "user_isolation": "All tools validate user_id matches authenticated JWT user before executing",
+    "stateless": "Tools are pure functions with no internal state - deterministic given inputs",
+    "audit": "All tool invocations logged to ToolInvocation table for traceability",
+    "error_handling": "Tools return structured errors rather than throwing exceptions",
+    "validation": "Input validation performed before database operations"
+  }
+}

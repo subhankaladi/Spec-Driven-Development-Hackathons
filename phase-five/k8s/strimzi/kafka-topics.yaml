@@ -1,0 +1,50 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: task-events
+  labels:
+    strimzi.io/cluster: strimzi-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    # 7-day retention for task lifecycle events
+    retention.ms: "604800000"
+    # Use log compaction to keep latest state
+    cleanup.policy: "delete"
+    # Compression for efficiency
+    compression.type: "snappy"
+    # Timeout settings
+    min.insync.replicas: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: reminders
+  labels:
+    strimzi.io/cluster: strimzi-kafka
+spec:
+  partitions: 2
+  replicas: 1
+  config:
+    # 3-day retention for reminders
+    retention.ms: "259200000"
+    cleanup.policy: "delete"
+    compression.type: "snappy"
+    min.insync.replicas: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: task-updates
+  labels:
+    strimzi.io/cluster: strimzi-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    # 1-day retention for real-time sync events
+    retention.ms: "86400000"
+    cleanup.policy: "delete"
+    compression.type: "snappy"
+    min.insync.replicas: 1

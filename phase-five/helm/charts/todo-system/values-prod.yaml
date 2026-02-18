@@ -1,0 +1,40 @@
+# Production deployment values for cloud Kubernetes (AKS/GKE/OKE)
+
+global:
+  environment: production
+  imagePullPolicy: IfNotPresent
+  registry: ghcr.io  # Change to your container registry
+  namespace: todo-system
+
+dapr:
+  enabled: true
+
+kafka:
+  enabled: false  # Use managed Kafka service
+  brokers: "redpanda-broker:9092"  # Replace with managed Kafka endpoint
+
+microservices:
+  replicas: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+local:
+  enabled: false
+
+production:
+  enabled: true
+  managedKafka: true
+  externalSecrets: true
+  replicas: 2
+  
+# High availability settings
+ha:
+  enabled: true
+  podDisruptionBudget: true
+  affinity:
+    podAntiAffinity: preferred

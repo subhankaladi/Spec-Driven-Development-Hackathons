@@ -1,0 +1,160 @@
+# Default values for todo-chat-bot
+# This is a YAML-formatted file for Minikube local deployment
+
+# Global settings
+global:
+  environment: local
+  namespace: default
+
+# Frontend service configuration
+frontend:
+  name: task-frontend
+  replicaCount: 1
+
+  image:
+    repository: task-frontend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  service:
+    type: NodePort
+    port: 3000
+    targetPort: 3000
+    nodePort: 30000
+
+  env:
+    NEXT_PUBLIC_API_URL: "http://localhost:8000"
+    NEXT_PUBLIC_DEBUG: "false"
+    BETTER_AUTH_SECRET: "Ux5qIEE1sN32gIctDVkPWzLJQS3Fc3Th"
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  podAnnotations: {}
+  podLabels: {}
+
+# Backend service configuration
+backend:
+  name: task-backend
+  replicaCount: 1
+
+  image:
+    repository: task-backend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  service:
+    type: NodePort
+    port: 8000
+    targetPort: 8000
+    nodePort: 30001
+
+  env:
+    DATABASE_URL: "postgresql://neondb_owner:npg_c6fIubW3eNMx@ep-quiet-wave-ad68glnf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
+    JWT_ALGORITHM: "HS256"
+    JWT_EXPIRATION_MINUTES: "15"
+    JWT_REFRESH_EXPIRATION_HOURS: "168"
+    BCRYPT_ROUNDS: "12"
+    DEBUG: "false"
+    LOG_LEVEL: "info"
+    OPENAI_API_KEY: "sk-demo-key"
+    OPENAI_MODEL: "gpt-4o-mini"
+    AGENT_MAX_TOKENS: "1000"
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  livenessProbe:
+    httpGet:
+      path: /docs
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /docs
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  podAnnotations: {}
+  podLabels: {}
+
+# Service Account configuration
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+# Pod Security Context
+podSecurityContext: {}
+
+# Container Security Context
+securityContext: {}
+
+# Ingress configuration (disabled for Minikube)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Auto-scaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Volume configuration
+volumes: []
+
+volumeMounts: []
+
+# Node selector for pod scheduling
+nodeSelector: {}
+
+# Tolerations for pod scheduling
+tolerations: []
+
+# Affinity rules for pod scheduling
+affinity: {}
+
+# Image pull secrets for private registries
+imagePullSecrets: []
+
+# Name overrides
+nameOverride: ""
+fullnameOverride: ""

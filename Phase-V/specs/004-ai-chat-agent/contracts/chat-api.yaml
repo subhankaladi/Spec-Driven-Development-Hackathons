@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: AI Chat Agent API
+  description: Chat endpoint for natural language todo management via AI agent
+  version: 1.0.0
+  contact:
+    name: Phase-III AI Chat Agent
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /chat:
+    post:
+      summary: Send message to AI agent
+      description: |
+        Submit a user message to the AI agent for processing. The agent interprets
+        the message, invokes MCP tools as needed, and returns a conversational response.
+
+        Authentication: Requires valid JWT token in Authorization header.
+        User Isolation: Agent only accesses tasks/data for authenticated user.
+        Stateless: Conversation context rebuilt from database on each request.
+
+      tags:
+        - Chat
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            examples:
+              new_conversation:
+                summary: Start new conversation
+                value:
+                  conversation_id: null
+                  message: "Create a task to buy milk"
+              existing_conversation:
+                summary: Continue existing conversation
+                value:
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                  message: "Show me my tasks"
+      responses:
+        '200':
+          description: Agent response successfully generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              examples:
+                task_created:
+                  summary: Task creation success
+                  value:
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                    message_id: "660e8400-e29b-41d4-a716-446655440001"
+                    agent_response: "Task created: Buy milk"
+                    tool_invocations:
+                      - tool_name: "create_task"
+                        success: true
+                        result: '{"id": "770e8400-e29b-41d4-a716-446655440002", "title": "Buy milk"}'
+                tasks_listed:
+                  summary: Task list success
+                  value:
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                    message_id: "660e8400-e29b-41d4-a716-446655440003"
+                    agent_response: "You have 3 tasks:\n1. Buy milk (incomplete)\n2. Call John (incomplete)\n3. Finish project (complete)"
+                    tool_invocations:
+                      - tool_name: "list_tasks"
+                        success: true
+                        result: '[{"id": "...", "title": "Buy milk", "is_completed": false}, ...]'
+        '400':
+          description: Invalid request (malformed JSON, missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Message content is required"
+                  details: "Field 'message' cannot be empty"
+        '401':
+          description: Unauthorized (missing or invalid JWT token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Authentication required"
+                  details: "Valid JWT token must be provided in Authorization header"
+        '404':
+          description: Conversation not found for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "CONVERSATION_NOT_FOUND"
+                  message: "Conversation does not exist or does not belong to user"
+                  details: "conversation_id: 550e8400-e29b-41d4-a716-446655440000"
+        '500':
+          description: Internal server error (agent failure, database error, tool error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "AGENT_ERROR"
+                  message: "Failed to process message"
+                  details: "OpenAI API request timeout"
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: |
+            Existing conversation ID to continue, or null to start new conversation.
+            If null, a new conversation is created for the authenticated user.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          description: User message content in natural language
+          example: "Create a task to buy milk"
+
+    ChatResponse:
+      type: object
+      required:
+        - conversation_id
+        - message_id
+        - agent_response
+        - tool_invocations
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+          description: Conversation ID (new or existing)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        message_id:
+          type: string
+          format: uuid
+          description: Agent message ID
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        agent_response:
+          type: string
+          description: Agent's conversational response text
+          example: "Task created: Buy milk"
+        tool_invocations:
+          type: array
+          description: List of MCP tools invoked during processing
+          items:
+            $ref: '#/components/schemas/ToolInvocationSummary'
+
+    ToolInvocationSummary:
+      type: object
+      required:
+        - tool_name
+        - success
+      properties:
+        tool_name:
+          type: string
+          enum: [create_task, list_tasks, update_task, delete_task]
+          description: MCP tool name
+          example: "create_task"
+        success:
+          type: boolean
+          description: Whether tool invocation succeeded
+          example: true
+        result:
+          type: string
+          nullable: true
+          description: JSON string of tool output (if success=true)
+          example: '{"id": "770e8400-e29b-41d4-a716-446655440002", "title": "Buy milk"}'
+        error:
+          type: string
+          nullable: true
+          description: Error message (if success=false)
+          example: null
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "Message content is required"
+            details:
+              type: string
+              nullable: true
+              description: Additional error context
+              example: "Field 'message' cannot be empty"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token from Phase-II authentication.
+        Obtain via POST /auth/signin and include in Authorization header.

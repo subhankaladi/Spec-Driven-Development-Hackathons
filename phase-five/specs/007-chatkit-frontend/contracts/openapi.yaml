@@ -1,0 +1,593 @@
+openapi: 3.0.0
+info:
+  title: ChatKit Frontend - Chat API Contract
+  description: |
+    REST API contract between ChatKit frontend and AI Agent Chat API backend.
+    All endpoints require JWT authentication via httpOnly cookies.
+  version: 1.0.0
+  contact:
+    name: Phase III AI-Powered Todo Chatbot Team
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+  - CookieAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token in Authorization header (fallback; httpOnly cookies preferred)
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+      description: JWT token in httpOnly cookie (preferred method)
+
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      description: Universally Unique Identifier (RFC 4122)
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+    DateTime:
+      type: string
+      format: date-time
+      description: ISO 8601 format date-time
+      example: "2026-01-17T10:30:00Z"
+
+    MessageRole:
+      type: string
+      enum:
+        - user
+        - assistant
+      description: Role of message sender
+
+    Message:
+      type: object
+      required:
+        - id
+        - conversation_id
+        - role
+        - content
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        conversation_id:
+          $ref: '#/components/schemas/UUID'
+        role:
+          $ref: '#/components/schemas/MessageRole'
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: Message text content
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolCall'
+          nullable: true
+          description: MCP tools invoked by agent (if any)
+        created_at:
+          $ref: '#/components/schemas/DateTime'
+
+    ToolCall:
+      type: object
+      required:
+        - tool
+        - parameters
+        - result
+      properties:
+        tool:
+          type: string
+          enum:
+            - add_task
+            - list_tasks
+            - complete_task
+            - update_task
+            - delete_task
+          description: MCP tool name
+        parameters:
+          type: object
+          description: Tool parameters (schema depends on tool)
+          additionalProperties: true
+        result:
+          type: object
+          description: Tool execution result
+          additionalProperties: true
+
+    Conversation:
+      type: object
+      required:
+        - id
+        - title
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        title:
+          type: string
+          maxLength: 255
+          description: Conversation title (user-provided or auto-generated)
+        created_at:
+          $ref: '#/components/schemas/DateTime'
+        updated_at:
+          $ref: '#/components/schemas/DateTime'
+        message_count:
+          type: integer
+          minimum: 0
+          description: Number of messages in conversation
+        last_message:
+          type: string
+          nullable: true
+          description: Preview of most recent message
+
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        conversation_id:
+          $ref: '#/components/schemas/UUID'
+          nullable: true
+          description: |
+            Existing conversation ID or null to create new conversation.
+            If null, creates new conversation with auto-generated title.
+        message:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          description: User message text
+
+    ChatResponse:
+      type: object
+      required:
+        - conversation_id
+        - user_message
+        - agent_response
+      properties:
+        conversation_id:
+          $ref: '#/components/schemas/UUID'
+          description: Conversation ID (new or existing)
+        user_message:
+          $ref: '#/components/schemas/Message'
+          description: The user's message (stored by backend)
+        agent_response:
+          $ref: '#/components/schemas/Message'
+          description: Agent's response with tool_calls if applicable
+
+    ConversationList:
+      type: object
+      required:
+        - conversations
+        - total
+        - limit
+        - offset
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+          description: List of user's conversations
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of conversations for this user
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Pagination limit (records per page)
+        offset:
+          type: integer
+          minimum: 0
+          description: Pagination offset (number of records skipped)
+
+    ConversationMessages:
+      type: object
+      required:
+        - conversation_id
+        - messages
+        - total
+        - limit
+        - offset
+      properties:
+        conversation_id:
+          $ref: '#/components/schemas/UUID'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: Messages in this conversation (chronological order)
+        total:
+          type: integer
+          minimum: 0
+          description: Total messages in conversation
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Pagination limit
+        offset:
+          type: integer
+          minimum: 0
+          description: Pagination offset
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - details
+      properties:
+        error:
+          type: string
+          description: Error code (e.g., INVALID_TOKEN, RATE_LIMITED)
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+          example:
+            invalid_fields:
+              - "message"
+            reason: "Message exceeds 5000 character limit"
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      properties:
+        error:
+          enum:
+            - VALIDATION_ERROR
+        details:
+          type: object
+          properties:
+            invalid_fields:
+              type: array
+              items:
+                type: string
+
+    UnauthorizedError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      properties:
+        error:
+          enum:
+            - UNAUTHORIZED
+        message:
+          example: "Invalid or expired JWT token"
+
+    RateLimitError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      properties:
+        error:
+          enum:
+            - RATE_LIMITED
+        message:
+          example: "Rate limit exceeded: 10 requests per minute"
+
+    ServerError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      properties:
+        error:
+          enum:
+            - INTERNAL_SERVER_ERROR
+
+paths:
+  /api/chat:
+    post:
+      summary: Send chat message to agent
+      operationId: sendChatMessage
+      description: |
+        Send a message to the AI agent. Returns conversation ID, user message,
+        and agent response with any tool calls made.
+
+        **User Stories**:
+        - US1: Natural Language Task Management via Chat UI
+        - US4: Clear Loading, Error, and Confirmation States
+
+        **Requirements**:
+        - FR-008: Every request includes JWT
+        - FR-002: Users can type and send natural language messages
+        - FR-003: Max 5000 characters per message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            example:
+              conversation_id: null
+              message: "Add a task to buy groceries"
+      responses:
+        '200':
+          description: Message processed successfully; agent response returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              example:
+                conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                user_message:
+                  id: "550e8400-e29b-41d4-a716-446655440001"
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                  role: "user"
+                  content: "Add a task to buy groceries"
+                  created_at: "2026-01-17T10:30:00Z"
+                agent_response:
+                  id: "550e8400-e29b-41d4-a716-446655440002"
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                  role: "assistant"
+                  content: "✓ I've added a new task: Buy groceries"
+                  tool_calls:
+                    - tool: "add_task"
+                      parameters:
+                        title: "Buy groceries"
+                      result:
+                        task_id: "550e8400-e29b-41d4-a716-446655440003"
+                        status: "created"
+                  created_at: "2026-01-17T10:30:02Z"
+        '400':
+          description: Invalid request (empty message, exceeds length limit, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                error: "VALIDATION_ERROR"
+                message: "Message cannot be empty"
+                details:
+                  invalid_fields:
+                    - "message"
+        '401':
+          description: Unauthorized (missing or invalid JWT token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              example:
+                error: "UNAUTHORIZED"
+                message: "JWT token expired. Please re-authenticate."
+                details: {}
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "NOT_FOUND"
+                message: "Conversation not found"
+                details:
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+              example:
+                error: "RATE_LIMITED"
+                message: "Rate limit exceeded: 10 requests per minute"
+                details:
+                  reset_after_seconds: 45
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds to wait before retry
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+              example:
+                error: "INTERNAL_SERVER_ERROR"
+                message: "An unexpected error occurred"
+                details: {}
+
+  /api/chat/conversations:
+    get:
+      summary: List user's conversations
+      operationId: listConversations
+      description: |
+        Retrieve paginated list of user's conversations, sorted by most recent first.
+
+        **User Stories**:
+        - US2: Conversation Resume Behavior
+
+        **Requirements**:
+        - FR-007: Users can see list of previous conversations
+        - FR-023: Conversation list shows most recent conversations first
+        - FR-024: Pagination prevents performance issues
+
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of conversations to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of conversations to skip (for pagination)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Conversation list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationList'
+              example:
+                conversations:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    title: "Shopping list planning"
+                    created_at: "2026-01-16T15:00:00Z"
+                    updated_at: "2026-01-17T09:45:00Z"
+                    message_count: 12
+                    last_message: "Done! Updated shopping list"
+                total: 42
+                limit: 20
+                offset: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+
+  /api/chat/{conversation_id}:
+    get:
+      summary: Get conversation message history
+      operationId: getConversation
+      description: |
+        Retrieve messages from a specific conversation in chronological order.
+
+        **User Stories**:
+        - US2: Conversation Resume Behavior
+
+        **Requirements**:
+        - FR-021: Conversation history loads automatically
+        - FR-025: Conversation maintains full message history in chronological order
+        - FR-024: Pagination for large conversations
+
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: Conversation ID
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: limit
+          in: query
+          description: Maximum messages to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of messages to skip (pagination)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationMessages'
+              example:
+                conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                messages:
+                  - id: "550e8400-e29b-41d4-a716-446655440001"
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                    role: "user"
+                    content: "Show me my tasks"
+                    created_at: "2026-01-17T09:00:00Z"
+                  - id: "550e8400-e29b-41d4-a716-446655440002"
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                    role: "assistant"
+                    content: "Here are your tasks: 1. Buy milk, 2. Review proposal"
+                    tool_calls:
+                      - tool: "list_tasks"
+                        parameters: {}
+                        result:
+                          tasks:
+                            - id: "task-1"
+                              title: "Buy milk"
+                    created_at: "2026-01-17T09:00:02Z"
+                total: 24
+                limit: 50
+                offset: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "NOT_FOUND"
+                message: "Conversation not found or access denied"
+                details: {}
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+
+tags:
+  - name: Chat
+    description: Chat messaging endpoints
+    externalDocs:
+      url: './spec.md'
+      description: Full feature specification
+
+x-implementation-notes:
+  authentication: |
+    All endpoints require JWT authentication. Tokens are transmitted via:
+    1. **Preferred**: httpOnly cookie set by backend (automatic CORS)
+    2. **Fallback**: Authorization Bearer header (if cookies unavailable)
+
+  error-handling: |
+    Frontend must translate backend error codes to user-friendly messages:
+    - UNAUTHORIZED → "Your session expired. Please log in again."
+    - RATE_LIMITED → "You're sending messages too fast. Please wait."
+    - VALIDATION_ERROR → "Message is invalid. Please check and try again."
+    - INTERNAL_SERVER_ERROR → "Server is busy. Please try again later."
+
+  pagination: |
+    For large conversaton/message lists, use pagination:
+    - Request limit=50, offset=0 for first page
+    - Use total from response to calculate pages
+    - Increment offset by limit for next page
+    - Stop when offset >= total
+
+  timestamps: |
+    All timestamps use ISO 8601 format (UTC): "2026-01-17T10:30:00Z"
+    Frontend should convert to user's local timezone for display.
+
+  idempotency: |
+    POST /api/chat is NOT idempotent. Sending duplicate requests creates
+    duplicate messages. Frontend should prevent double-submission using:
+    - Disable send button while request in-flight
+    - Show loading state
+    - Prevent Enter key during loading

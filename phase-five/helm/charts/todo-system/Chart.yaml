@@ -1,0 +1,26 @@
+apiVersion: v2
+name: todo-system
+description: Phase V - Advanced Event-Driven Cloud Deployment for Todo Platform
+type: application
+version: 0.1.0
+appVersion: "1.0"
+home: https://github.com/Spec-Driven-Development-Hackathons/phase-five
+maintainers:
+  - name: Phase V Team
+    email: team@example.com
+keywords:
+  - todo
+  - microservices
+  - event-driven
+  - kafka
+  - dapr
+dependencies:
+  - name: dapr
+    version: "1.x"
+    repository: https://dapr.github.io/helm-charts
+    condition: dapr.enabled
+  - name: kafka
+    version: "25.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: kafka.enabled
+    alias: strimzi-kafka

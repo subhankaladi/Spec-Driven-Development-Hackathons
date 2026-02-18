@@ -1,0 +1,40 @@
+# Default values for todo-app.
+
+backend:
+  replicaCount: 1
+  image:
+    repository: backend
+    pullPolicy: Never
+    tag: "latest"
+  service:
+    type: NodePort
+    port: 8000
+    nodePort: 30080  # Fixed port for easy access
+  env:
+    DATABASE_URL: "postgresql://neondb_owner:npg_"
+    API_HOST: "0.0.0.0"
+    API_PORT: "8000"
+    JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
+    JWT_ALGORITHM: "HS256"
+    JWT_EXPIRATION_MINUTES: "15"
+    JWT_REFRESH_EXPIRATION_HOURS: "168"
+    BCRYPT_ROUNDS: "12"
+    DEBUG: "false"
+    LOG_LEVEL: "info"
+    # OPENAI_API_KEY: "your-openai-api-key" # Set this to your OpenAI API key for AI features
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: frontend
+    pullPolicy: Never
+    tag: "latest"
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30030 # Fixed port
+  env:
+    # Note: Client-side env vars are baked in at build time.
+    # Server-side vars (Next.js middleware/SSR) use these.
+    BETTER_AUTH_SECRET: "your-better-auth-secret" # You might want to update this
+    BETTER_AUTH_URL: "http://localhost:3000" # URL where frontend is accessible
