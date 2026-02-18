@@ -1,0 +1,69 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Testing
+tests/
+test_*.py
+.pytest_cache
+
+# IDEs
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Git
+.git
+.gitignore
+
+# Database
+*.db
+test.db
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Documentation
+README.md
+QUICKSTART.md
+IMPLEMENTATION.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Alembic
+alembic/__pycache__/

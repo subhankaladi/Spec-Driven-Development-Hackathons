@@ -1,0 +1,43 @@
+# FastAPI and dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# SQLModel for database operations
+sqlmodel>=0.0.14
+
+# Database
+psycopg2-binary>=2.9.9
+alembic>=1.13.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0
+
+# Environment configuration
+python-dotenv>=1.0.0
+
+# Authentication
+bcrypt>=4.1.0
+pyjwt>=2.9.0
+python-jose>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Utilities
+python-multipart>=0.0.6
+
+# Date/Time utilities
+python-dateutil>=2.8.0
+
+# Kafka
+aiokafka>=0.10.0
+
+# Dapr
+dapr>=1.9.0
+dapr-ext-grpc>=1.9.0
+
+# AI/ML
+openai>=1.0.0
+# mcp-sdk>=0.1.0

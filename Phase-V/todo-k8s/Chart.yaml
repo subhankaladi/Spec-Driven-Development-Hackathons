@@ -1,0 +1,25 @@
+apiVersion: v2
+name: todo-chat-bot
+description: Full-stack Task Management with AI Chat Bot Application - Helm Chart for Kubernetes Deployment
+type: application
+
+# Chart version
+version: 0.2.0
+
+# Application version
+appVersion: "1.0.0"
+
+# Chart metadata
+home: https://github.com/YT-Hackathon-II
+sources:
+  - https://github.com/YT-Hackathon-II/phase-four
+maintainers:
+  - name: Development Team
+    email: dev@example.com
+keywords:
+  - task-management
+  - chat-bot
+  - ai
+  - fastapi
+  - nextjs
+  - kubernetes

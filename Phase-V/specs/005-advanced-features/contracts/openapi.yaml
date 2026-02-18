@@ -1,0 +1,915 @@
+openapi: 3.0.3
+info:
+  title: Advanced Task Management API
+  description: API for advanced task management features including recurring tasks, due dates & reminders, priorities, tags, and search functionality
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+paths:
+  /users/{user_id}/tasks:
+    get:
+      summary: Get tasks with advanced filtering, sorting, and pagination
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: priority
+          in: query
+          description: Filter by priority level
+          schema:
+            type: string
+            enum: [low, medium, high]
+        - name: tag
+          in: query
+          description: Filter by tag name (can be repeated)
+          schema:
+            type: string
+        - name: due_after
+          in: query
+          description: Filter tasks with due date after this date
+          schema:
+            type: string
+            format: date-time
+        - name: due_before
+          in: query
+          description: Filter tasks with due date before this date
+          schema:
+            type: string
+            format: date-time
+        - name: completed
+          in: query
+          description: Filter by completion status
+          schema:
+            type: boolean
+        - name: sort_by
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [created_at, due_date, priority, title]
+        - name: sort_order
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: List of tasks with filtering and pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskInstance'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  page_size:
+                    type: integer
+                  total_pages:
+                    type: integer
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+    post:
+      summary: Create a new task with advanced features
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskInstance'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+  /users/{user_id}/tasks/{task_id}:
+    get:
+      summary: Get a specific task
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskInstance'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+    put:
+      summary: Update a task completely
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskInstance'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+    patch:
+      summary: Partially update a task
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskInstance'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+    delete:
+      summary: Delete a task
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+  /users/{user_id}/recurring-tasks:
+    get:
+      summary: Get recurring task templates
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of recurring task templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecurringTaskTemplate'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a recurring task template
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecurringTaskRequest'
+      responses:
+        '201':
+          description: Recurring task template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringTaskTemplate'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+  /users/{user_id}/recurring-tasks/{template_id}:
+    get:
+      summary: Get a specific recurring task template
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: template_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recurring task template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringTaskTemplate'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+    put:
+      summary: Update a recurring task template
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: template_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecurringTaskRequest'
+      responses:
+        '200':
+          description: Recurring task template updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringTaskTemplate'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+    delete:
+      summary: Delete a recurring task template
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: template_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Recurring task template deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+  /users/{user_id}/reminders:
+    get:
+      summary: Get reminders for user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reminder'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a reminder
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReminderRequest'
+      responses:
+        '201':
+          description: Reminder created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+  /users/{user_id}/tags:
+    get:
+      summary: Get user's tags
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a new tag
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized
+  /users/{user_id}/tasks/search:
+    post:
+      summary: Advanced search for tasks
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid search parameters
+        '401':
+          description: Unauthorized
+components:
+  schemas:
+    TaskInstance:
+      type: object
+      required:
+        - id
+        - user_id
+        - title
+        - priority
+        - is_completed
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the task
+        user_id:
+          type: string
+          format: uuid
+          description: Owner of the task
+        title:
+          type: string
+          maxLength: 255
+          description: Title of the task
+        description:
+          type: string
+          description: Description of the task
+        priority:
+          type: string
+          enum: [low, medium, high]
+          description: Priority level of the task
+        due_date:
+          type: string
+          format: date-time
+          description: Due date for the task
+        is_completed:
+          type: boolean
+          description: Completion status of the task
+        parent_template_id:
+          type: string
+          format: uuid
+          description: Link to recurring template if applicable
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    RecurringTaskTemplate:
+      type: object
+      required:
+        - id
+        - user_id
+        - title
+        - priority
+        - recurrence_pattern
+        - start_date
+        - is_active
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the template
+        user_id:
+          type: string
+          format: uuid
+          description: Owner of the recurring task
+        title:
+          type: string
+          maxLength: 255
+          description: Title of the recurring task
+        description:
+          type: string
+          description: Description of the recurring task
+        priority:
+          type: string
+          enum: [low, medium, high]
+          description: Priority level
+        recurrence_pattern:
+          type: object
+          description: Recurrence rule in RFC 5545 RRULE format
+          properties:
+            freq:
+              type: string
+              enum: [daily, weekly, monthly, yearly]
+            interval:
+              type: integer
+              minimum: 1
+            byweekday:
+              type: array
+              items:
+                type: string
+                enum: [MO, TU, WE, TH, FR, SA, SU]
+            until:
+              type: string
+              format: date-time
+            count:
+              type: integer
+              minimum: 1
+        start_date:
+          type: string
+          format: date-time
+          description: When the recurrence starts
+        end_date:
+          type: string
+          format: date-time
+          description: When the recurrence ends (null for indefinite)
+        max_occurrences:
+          type: integer
+          minimum: 1
+          description: Max number of occurrences (null for indefinite)
+        is_active:
+          type: boolean
+          description: Whether the recurrence is active
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    Reminder:
+      type: object
+      required:
+        - id
+        - task_instance_id
+        - user_id
+        - reminder_time
+        - method
+        - is_sent
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the reminder
+        task_instance_id:
+          type: string
+          format: uuid
+          description: Associated task instance
+        user_id:
+          type: string
+          format: uuid
+          description: Owner of the reminder
+        reminder_time:
+          type: string
+          format: date-time
+          description: When the reminder should trigger
+        method:
+          type: string
+          enum: [email, push, sms]
+          description: How to deliver the reminder
+        is_sent:
+          type: boolean
+          description: Whether reminder has been sent
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    Tag:
+      type: object
+      required:
+        - id
+        - user_id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the tag
+        user_id:
+          type: string
+          format: uuid
+          description: Owner of the tag
+        name:
+          type: string
+          maxLength: 100
+          description: Name of the tag
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Color code for UI display
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    CreateTaskRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        due_date:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+          description: Array of tag names to associate with the task
+    UpdateTaskRequest:
+      type: object
+      required:
+        - title
+        - priority
+        - is_completed
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+        due_date:
+          type: string
+          format: date-time
+        is_completed:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+          description: Array of tag names to associate with the task
+    PatchTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+        due_date:
+          type: string
+          format: date-time
+        is_completed:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+          description: Array of tag names to associate with the task
+    CreateRecurringTaskRequest:
+      type: object
+      required:
+        - title
+        - priority
+        - recurrence_pattern
+        - start_date
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        recurrence_pattern:
+          $ref: '#/components/schemas/RecurrencePattern'
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        max_occurrences:
+          type: integer
+          minimum: 1
+    UpdateRecurringTaskRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateRecurringTaskRequest'
+        - type: object
+          properties:
+            is_active:
+              type: boolean
+    RecurrencePattern:
+      type: object
+      required:
+        - freq
+      properties:
+        freq:
+          type: string
+          enum: [daily, weekly, monthly, yearly]
+        interval:
+          type: integer
+          minimum: 1
+          default: 1
+        byweekday:
+          type: array
+          items:
+            type: string
+            enum: [MO, TU, WE, TH, FR, SA, SU]
+        until:
+          type: string
+          format: date-time
+        count:
+          type: integer
+          minimum: 1
+    CreateReminderRequest:
+      type: object
+      required:
+        - task_instance_id
+        - reminder_time
+        - method
+      properties:
+        task_instance_id:
+          type: string
+          format: uuid
+        reminder_time:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum: [email, push, sms]
+    CreateTagRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+    SearchRequest:
+      type: object
+      properties:
+        filters:
+          type: object
+          properties:
+            priority:
+              type: array
+              items:
+                type: string
+                enum: [low, medium, high]
+            tags:
+              type: array
+              items:
+                type: string
+            due_after:
+              type: string
+              format: date-time
+            due_before:
+              type: string
+              format: date-time
+            completed:
+              type: boolean
+            title_contains:
+              type: string
+            description_contains:
+              type: string
+        sort_by:
+          type: string
+          enum: [created_at, due_date, priority, title]
+          default: created_at
+        sort_order:
+          type: string
+          enum: [asc, desc]
+          default: asc
+        page:
+          type: integer
+          default: 1
+          minimum: 1
+        page_size:
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+    SearchResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - page_size
+        - total_pages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskInstance'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer

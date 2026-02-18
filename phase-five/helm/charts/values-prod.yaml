@@ -1,0 +1,303 @@
+# Phase V - Production Cloud Deployment Values
+# Used for: helm install todo-system ./helm/charts -f helm/charts/values-prod.yaml
+# Supports: Azure AKS, Google GKE, Oracle OKE
+
+global:
+  environment: production
+  imagePullPolicy: IfNotPresent
+  registry: ghcr.io  # GitHub Container Registry (change to your registry)
+  namespace: todo-system  # Production namespace
+  domain: "todos.example.com"  # Change to your domain
+
+# Dapr configuration for production
+dapr:
+  enabled: true
+  mode: kubernetes
+  port: 3500
+  # High availability
+  ha:
+    enabled: true
+    replicas: 3
+  # Security
+  mtls: true
+  spiffe: true
+
+# Managed Kafka configuration (production)
+kafka:
+  enabled: false  # Use managed Kafka service
+  brokers: "kafka.example.com:9092"  # Your Kafka endpoint
+  topics:
+    - name: task-events
+      partitions: 10
+      replication: 3
+    - name: reminders
+      partitions: 5
+      replication: 3
+    - name: task-updates
+      partitions: 10
+      replication: 3
+  # Authentication for production Kafka
+  auth:
+    enabled: true
+    sasl:
+      mechanism: sha512
+      username: kafka-user  # From secrets
+      password: kafka-password  # From secrets
+
+# External PostgreSQL (Neon)
+postgresql:
+  enabled: false  # Using external managed database
+  host: "pg-xxxxx.us-east-1.aws.neon.tech"  # Your Neon endpoint
+  port: 5432
+  database: "tododb_prod"
+  username: "postgres"  # From secrets
+  # password from secrets
+
+# Microservices configuration for production
+microservices:
+  replicas: 2  # Minimum 2 for high availability
+
+  images:
+    coreTodo:
+      repository: "ghcr.io/your-org/phase-v-core-todo"
+      tag: "v1.0.0"  # Use specific versions in production
+    recurringTask:
+      repository: "ghcr.io/your-org/phase-v-recurring-task"
+      tag: "v1.0.0"
+    notification:
+      repository: "ghcr.io/your-org/phase-v-notification"
+      tag: "v1.0.0"
+    auditLog:
+      repository: "ghcr.io/your-org/phase-v-audit-log"
+      tag: "v1.0.0"
+    websocketSync:
+      repository: "ghcr.io/your-org/phase-v-websocket-sync"
+      tag: "v1.0.0"
+
+  # Production resource limits
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  # Pod disruption budget for high availability
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  # Affinity rules for pod distribution
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - core-todo-service
+            topologyKey: kubernetes.io/hostname
+
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    fsReadOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicas: 2
+  image:
+    repository: "ghcr.io/your-org/phase-v-frontend"
+    tag: "v1.0.0"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Core Todo Service
+coreTodoService:
+  name: core-todo-service
+  port: 8000
+  replicas: 2
+  enabled: true
+
+# Recurring Task Service
+recurringTaskService:
+  name: recurring-task-service
+  port: 8001
+  replicas: 2
+  enabled: true
+
+# Notification Service (can scale higher)
+notificationService:
+  name: notification-service
+  port: 8002
+  replicas: 3  # Scale higher for notifications
+  enabled: true
+
+# Audit Log Service (needs ordering guarantees)
+auditLogService:
+  name: audit-log-service
+  port: 8003
+  replicas: 1  # Keep single for ordering
+  enabled: true
+
+# WebSocket Sync Service
+websocketSyncService:
+  name: websocket-sync-service
+  port: 8004
+  replicas: 2
+  enabled: true
+  # Sticky sessions for WebSocket
+  sessionAffinity: ClientIP
+  sessionAffinityTimeout: 3600
+
+# Local development disabled
+local:
+  enabled: false
+
+# Production settings
+production:
+  enabled: true
+  managedKafka: true
+  externalSecrets: true
+  replicas: 2
+  ha:
+    enabled: true
+    minAvailable: 1
+
+# Storage configuration
+storage:
+  type: persistent
+  class: "fast"  # Use fast storage class for better performance
+  size: "10Gi"
+
+# Networking
+networking:
+  type: loadbalancer
+  ingress:
+    enabled: true
+    className: "nginx"  # or "gce" for GKE, "oci" for OKE
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: "todos.example.com"
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: todos-tls
+        hosts:
+          - todos.example.com
+
+# Logging
+logging:
+  level: "warn"  # Less verbose in production
+  format: "json"
+  # Structured logging
+  structured: true
+
+# Health checks with production values
+healthChecks:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Dapr components for production
+daprComponents:
+  pubsub:
+    type: kafka
+    brokers: "kafka.example.com:9092"
+    auth:
+      enabled: true
+      sasl:
+        mechanism: sha512
+  stateStore:
+    type: postgresql
+    connectionString: "postgresql://user:pass@pg-host:5432/tododb"
+    maxConns: 50  # Higher for production
+  secretsStore:
+    type: kubernetes  # or vault
+  jobs:
+    type: kubernetes
+    # Can also use external job scheduler
+
+# Monitoring and observability
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    scrapeInterval: 30s
+  logging:
+    enabled: true
+    aggregator: "fluent-bit"  # or fluentd, logstash
+  tracing:
+    enabled: true
+    exporter: "otlp"
+    samplingRate: 0.1  # 10% sampling in production
+
+# Security
+security:
+  # Network policies
+  networkPolicy:
+    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: ingress-nginx
+
+  # Pod security policy
+  podSecurityPolicy:
+    enabled: true
+    level: restricted
+
+  # RBAC
+  rbac:
+    enabled: true
+
+  # Image pull secrets (for private registry)
+  imagePullSecrets:
+    - name: ghcr-secret
+
+# Backup and disaster recovery
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # 2 AM UTC daily
+  retention: 30  # days
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Rate limiting and quotas
+quotas:
+  enabled: true
+  requests:
+    cpu: 10
+    memory: 20Gi
+  limits:
+    cpu: 20
+    memory: 40Gi
+
+# Service mesh (optional)
+serviceMesh:
+  enabled: false  # Set to true if using Istio or Linkerd
+  type: "istio"  # or "linkerd"
